@@ -1,5 +1,14 @@
 import numpy as np
 
+##https://share.descript.com/view/oP4BG2VL1UJ
+## this is how you load json numpy array from json filet
+def load_json_dict(path):
+    with open(path) as f:
+        data = json.load(f)
+    print(data)
+    return np.asarray(data)
+
+## if you do not numpy it should convert python and you can get your python tensor into numpy
 def compare_values(array1,array2, num_bins=10, num_highest_values=2):
     array1 = array1.flatten()
     array2 = array2.flatten()
