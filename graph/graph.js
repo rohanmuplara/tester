@@ -1,12 +1,34 @@
-async function testTensor () {
-  console.time("a");
-  const tensor1 = tf.ones([256, 28, 28]);
-  const new_tensor1 = tensor1.expandDims(0);
+async function testTensor (tensor, num_runs) {
+  console.time("model loading time");
   const model = await tf.loadGraphModel("https://storage.googleapis.com/uplara_tfjs/final5/model.json");
-  console.timeEnd("a");
-  const predictions =  model.execute([tensor1]);
-  console.log("predictions");
+  console.timeEnd("model loading time");
+  console.time("first prediction");
+  const predictionsTensor =  await model.executeAsync([tensor]);
+  const predictions = predictionsTensor.dataSync();
+  console.timeEnd("first prediction");
+  let subsequent_times =new Float32Array(num_runs);
+  for (let i = 0; i < num_runs -1; i++) {
+    var begin= Date.now();
+    console.time("first prediction");
+    const predictionsTensor =  await model.executeAsync([tensor]);
+    const predictions = predictionsTensor.dataSync();
+    console.timeEnd("first prediction");
+    var end= Date.now();
+    console.log("inside of the for loop");
+    let time = (end-begin) ;
+    subsequent_times[i] = time;
+  }
+  console.log("subsequent predictions are in ms", subsequent_times);
 }
+
+function testTensorDefininedInCode() {
+    let tensor = tf.ones([28, 28]);
+    tensor = tensor.expandDims(0);
+    console.log("the tensor is", tensor);
+    testTensor(tensor, 10);
+}
+
+
 
 function updateValue(e) {
   console.log(e.target.value);
@@ -43,4 +65,4 @@ function readFileContent(file) {
 
 
 initializeFileUploader();
-testTensor();
+testTensorDefininedInCode();
