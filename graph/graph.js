@@ -8,17 +8,19 @@ async function testTensor (tensor, num_runs) {
   console.timeEnd("first prediction");
   let subsequent_times =new Float32Array(num_runs);
   for (let i = 0; i < num_runs -1; i++) {
-    var begin= Date.now();
+    var begin= window.performance.now();
     console.time("first prediction");
     const predictionsTensor =  await model.executeAsync([tensor]);
     const predictions = predictionsTensor.dataSync();
     console.timeEnd("first prediction");
-    var end= Date.now();
+    var end= window.performance.now();
     console.log("inside of the for loop");
     let time = (end-begin) ;
     subsequent_times[i] = time;
   }
   console.log("subsequent predictions are in ms", subsequent_times);
+  let average = (array) => array.reduce((a, b) => a + b) / array.length;
+  console.log("the average of the subequent predictions are", subsequent_times);
 }
 
 function testTensorDefininedInCode() {
@@ -27,8 +29,6 @@ function testTensorDefininedInCode() {
     console.log("the tensor is", tensor);
     testTensor(tensor, 10);
 }
-
-
 
 function updateValue(e) {
   console.log(e.target.value);
