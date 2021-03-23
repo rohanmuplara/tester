@@ -6,12 +6,13 @@ async function testTensor (tensor, num_runs) {
   const predictionsTensor =  await model.executeAsync([tensor]);
   const predictions = predictionsTensor.dataSync();
   console.timeEnd("first prediction");
+  console.log("the predictions are", predictions);
   let subsequent_times =new Float32Array(num_runs - 1);
   for (let i = 0; i < num_runs - 1 ; i++) {
-    var begin= window.performance.now();
+    let begin= window.performance.now();
     const predictionsTensor =  await model.executeAsync([tensor]);
     const predictions = predictionsTensor.dataSync();
-    var end= window.performance.now();
+    let end= window.performance.now();
     let time = (end-begin) ;
     subsequent_times[i] = time;
   }
@@ -30,6 +31,15 @@ function testTensorDefininedInCode() {
     console.log("the tensor is", tensor);
     testTensor(tensor, 10);
 }
+
+function testUploadedTensor(array) {
+    let tensor = tf.tensor(array);
+    tensor = tensor.expandDims(0);
+    console.log("the tensor insider is test uploaded array is", tensor);
+    testTensor(tensor, 10);
+}
+
+
 
 function updateValue(e) {
   console.log(e.target.value);
@@ -51,7 +61,8 @@ function getFile(event) {
 
 function placeFileContent(file) {
 	readFileContent(file).then(content => {
-    debugger;
+    let values = JSON.parse(content);
+    testUploadedTensor(values);
   }).catch(error => console.log(error))
 }
 
@@ -66,4 +77,4 @@ function readFileContent(file) {
 
 
 initializeFileUploader();
-testTensorDefininedInCode();
+//testTensorDefininedInCode();

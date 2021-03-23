@@ -1,12 +1,5 @@
 import numpy as np
 
-##https://share.descript.com/view/oP4BG2VL1UJ
-## this is how you load json numpy array from json filet
-def load_json_dict(path):
-    with open(path) as f:
-        data = json.load(f)
-    print(data)
-    return np.asarray(data)
 
 ## if you do not numpy it should convert python and you can get your python tensor into numpy
 def compare_values(array1,array2, num_bins=10, num_highest_values=2):
@@ -34,3 +27,19 @@ def compare_values(array1,array2, num_bins=10, num_highest_values=2):
 a = np.array([1,2,15,25, 4,54,455])
 b = np.array([8, 1,2,15,25,54,455])
 compare_values(a,b)
+
+
+
+b = a.tolist() # nested lists with same data, indices
+with open('./data.txt', 'w') as outfile:
+    json.dump(b, outfile)
+json_dump = json.dumps(b)
+
+##https://share.descript.com/view/oP4BG2VL1UJ
+## this is how you load json numpy array from json filet
+def load_json_dict(path):
+    with open(path) as f:
+        data = json.load(f)
+    print(data)
+    return np.asarray(data)
+
