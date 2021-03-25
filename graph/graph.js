@@ -1,18 +1,16 @@
 async function testInput (tensors, num_runs) {
   console.time("model loading time");
-  const model = await tf.loadGraphModel("https://storage.googleapis.com/uplara_tfjs/multipleoutputs/model.json");
+  const model = await tf.loadGraphModel("https://storage.googleapis.com/uplara_tfjs/multipleoutputs3/model.json");
   console.timeEnd("model loading time");
   console.time("first prediction");
-  const predictionsTensor =  await model.executeAsync(tensors);
-  debugger;
-  const predictions = predictionsTensor.ArraySync();
-  console.timeEnd("first prediction");
+  testInputHelper(model, tensors);
   console.log("the predictions are", predictions);
   download("results.json", predictions);
   let subsequent_times =new Float32Array(num_runs - 1);
   for (let i = 0; i < num_runs - 1 ; i++) {
     let begin= window.performance.now();
     const predictionsTensor =  await model.executeAsync(tensors);
+    debugger;
     const predictions = predictionsTensor.ArraySync();
     let end= window.performance.now();
     let time = (end-begin) ;
@@ -20,6 +18,16 @@ async function testInput (tensors, num_runs) {
   }
   console.log("subsequent predictions are in ms", subsequent_times);
   console.log("the average of the subequent predictions are", average(subsequent_times));
+}
+
+async function testInputHelper(model, tensors) {
+    let num_outputs = model.outputs.length;
+    let string_array = ["Identity:0"]; 
+    for (let i = 1; i < num_outputs; i++) {
+      string_array.push("Identity_" + i +":0");
+    }
+    const predictionsTensor =  await model.executeAsync(tensors, string_arrray));
+    debugger;
 }
 
 function download(filename, text) {
