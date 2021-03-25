@@ -28,7 +28,7 @@ function benchmarkInputDefininedInCode() {
     tensor1 = tensor1.expandDims(0);
     let tensor2 = tf.ones([5]);
     tensor2 = tensor2.expandDims(0);
-    benchmarkInput("https://storage.googleapis.com/uplara_tfjs/multipleoutputs3/model.json", [tensor1, tensor2], 10);
+    benchmarkInput("https://storage.googleapis.com/uplara_tfjs/multipleoutputs3/model.json", [tensor1, tensor2], 1000);
 }
 
 benchmarkInputDefininedInCode();

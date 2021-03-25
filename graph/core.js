@@ -11,9 +11,11 @@ async function runModel(model, tensors, returnTensorReferences ) {
       if (Array.isArray(predictionsTensor)) {
         const promises = predictionsTensor.map(x => x.array());
         const arrayTensor = await Promise.all(promises);
+        tf.dispose(predictionsTensor);
         return arrayTensor;
       } else {
         const arrayTensor = predictionsTensor.arraySync()
+        tf.dispose(predictionsTensor);
         return arrayTensor;
       }
     }
