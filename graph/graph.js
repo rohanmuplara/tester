@@ -10,9 +10,11 @@ async function runModel(model, tensors, returnTensorReferences ) {
     } else {
       if (Array.isArray(predictionsTensor)) {
         const promises = predictionsTensor.map(x => x.array());
-        const numpyResults = await Promise.all(promises);
+        const arrayTensor = await Promise.all(promises);
+        return arrayTensor;
       } else {
-        const predictionsTensor = predictionsTensor.arraySync()
+        const arrayTensor = predictionsTensor.arraySync()
+        return arrayTensor;
       }
     }
 }
@@ -25,12 +27,12 @@ async function benchmarkInput (tensors, num_runs) {
   console.timeEnd("model loading time");
   console.time("first prediction");
   const predictions = await runModel(model, tensors, false);
-  console.log("the predictions are", predictions);
-  download("results.json", predictions);
+  console.timeEnd("first prediction");
+
   let subsequent_times =new Float32Array(num_runs - 1);
   for (let i = 0; i < num_runs - 1 ; i++) {
     let begin= window.performance.now();
-    const predictionsTensor =  await model.executeAsync(tensors);
+    const predictions = await runModel(model, tensors, false);
     let end= window.performance.now();
     let time = (end-begin) ;
     subsequent_times[i] = time;
