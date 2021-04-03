@@ -31,4 +31,3 @@ function benchmarkInputDefininedInCode() {
     benchmarkInput("https://storage.googleapis.com/uplara_tfjs/multipleoutputs3/model.json", [tensor1, tensor2], 1000);
 }
 
-benchmarkInputDefininedInCode();
