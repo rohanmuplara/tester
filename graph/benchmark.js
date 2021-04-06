@@ -1,6 +1,6 @@
 async function benchmarkInput (model_path, tensors, num_runs) {
   console.time("model loading time");
-  const model = await tf.loadGraphModel("https://storage.googleapis.com/uplara_tfjs/multipleoutputs3/model.json");
+  //const model = await tf.loadGraphModel("https://storage.googleapis.com/uplara_tfjs/multipleoutputs3/model.json");
   console.timeEnd("model loading time");
   console.time("first prediction");
   const predictions = await runModel(model, tensors, false);
