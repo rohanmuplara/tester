@@ -1,6 +1,6 @@
 async function benchmarkInput (model_path, tensors, num_runs) {
   console.time("model loading time");
-  //const model = await tf.loadGraphModel("https://storage.googleapis.com/uplara_tfjs/multipleoutputs3/model.json");
+  let model = await tf.loadGraphModel(model_path);
   console.timeEnd("model loading time");
   console.time("first prediction");
   const predictions = await runModel(model, tensors, false);
@@ -24,10 +24,8 @@ function average(array) {
 }
 
 function benchmarkInputDefininedInCode() {
-    let tensor1 = tf.ones([5]);
+    let tensor1 = tf.ones([256, 256,3]);
     tensor1 = tensor1.expandDims(0);
-    let tensor2 = tf.ones([5]);
-    tensor2 = tensor2.expandDims(0);
-    benchmarkInput("https://storage.googleapis.com/uplara_tfjs/multipleoutputs3/model.json", [tensor1, tensor2], 1000);
+    benchmarkInput("https://storage.googleapis.com/tfjs-alok-uplara-abcde/bottoms_gzip/blazeface/tfjs/model.json.gz", [tensor1], 100);
 }
 

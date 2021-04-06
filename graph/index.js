@@ -1,9 +1,8 @@
 
 const tryon = async (setPrediction) => {
 
-    // https://storage.googleapis.com/tfjs-alok-uplara-abcde/bottoms_gzip/blazeface/tfjs/model.json.gz
     const grapyModel = `https://storage.googleapis.com/tfjs-alok-uplara-abcde/bottoms_gzip/grapy/atr_512_256_mobilenet_edge_loss_1/tfjs/model.json.gz`;
-    const segModel = `https://storage.googleapis.com/tfjs-alok-uplara-abcde/bottoms_gzip/tops/expseg/expected_seg_debug/tfjs/model.json.gz`;
+  const segModel = `https://storage.googleapis.com/tfjs-alok-uplara-abcde/bottoms_gzip/tops/expseg/expected_seg_debug/tfjs/model.json.gz`;
     const tpsModel = `https://storage.googleapis.com/tfjs-alok-uplara-abcde/bottoms_gzip/tops/tps/short_tshirts_default/tfjs/model.json.gz`;
     const tomModel = `https://storage.googleapis.com/tfjs-alok-uplara-abcde/bottoms_gzip/tops/tom/model_60/tfjs/model.json.gz`;
     const clothModel = `https://storage.googleapis.com/tfjs-alok-uplara-abcde/bottoms_gzip/tops/model_800/tfjs/model.json.gz`;
@@ -650,4 +649,4 @@ const tryon = async (setPrediction) => {
 
 }
 console.time("everything");
-tryon();
+//tryon();
