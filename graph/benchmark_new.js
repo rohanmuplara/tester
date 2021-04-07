@@ -1,16 +1,18 @@
-async function benchmarkInput (models) {
+async function benchmarkInput (models, num_runs) {
     let grapyModel = models[0];
     let segModel = models[1];
     let tpsModel = models[2];
     let tomModel = models[3];
     let blazefaceModel = models[4];
     let densposeModel = models[5];
-    let tensor1 = tf.ones([1, 256, 256,3]);
+    let tensor1 = tf.ones([1, 256, 192,3]);
     let grapyTensor = [tf.ones([1, 512, 256, 3])];
     let densposeTensor = [tf.ones([1, 256, 192, 3])];
     let blazefaceTensor = [tf.ones([1, 256, 256, 3])];
+    let tomTensor = [tensor1, tensor1, tf.ones([1, 256, 192, 1])];
     let segTensor = [tf.ones([1, 256, 192, 1]), tf.ones([1, 256, 192, 27]), tensor1, tf.ones([1, 256, 192, 1]), tensor1]
-
+    let tpsTensor = [tensor1, tf.ones([1, 256, 192, 1]), tf.ones([1, 256, 192, 1]), tensor1, tensor1];
+  for  (let i = 0; i < num_runs; i++) {
   console.time("first pass");
   console.time("first grapy prediction");
   const predictionsgrapy = await runModel(grapyModel, grapyTensor, false);
@@ -30,9 +32,9 @@ async function benchmarkInput (models) {
   console.time("first denspose prediction");
   const predictionsdenspose = await runModel(densposeModel, densposeTensor, false);
   console.timeEnd("first denspose prediction");
-  console.time("first pass");
+  console.timeEnd("first pass");
 
-
+  }
 
 
   let subsequent_times =new Float32Array(num_runs - 1);
@@ -65,7 +67,7 @@ async function benchmarkInputDefininedInCode() {
     ])
     console.timeEnd("tf.loadGraphModeling times");
        
-    benchmarkInput(models);
+    benchmarkInput(models, 10);
 }
 
 benchmarkInputDefininedInCode();
