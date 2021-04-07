@@ -1,10 +1,6 @@
 async function runModel(model, tensors, returnTensorReferences ) {
     let num_outputs = model.outputs.length;
-    let string_array = ["Identity:0"]; 
-    for (let i = 1; i < num_outputs; i++) {
-      string_array.push("Identity_" + i +":0");
-    }
-    const predictionsTensor =  await model.executeAsync(tensors, string_array);
+    const predictionsTensor =  await model.executeAsync(tensors, ["module_apply_default/hub_output/feature_vector/SpatialSqueeze"]);
     if (returnTensorReferences) {
       return predictionsTensor;
     } else {
@@ -25,7 +21,7 @@ async function runModel(model, tensors, returnTensorReferences ) {
 async function benchmarkInput (model_path, tensors, num_runs) {
   
   console.time("model loading time");
-  let model = await tf.loadGraphModel(model_path);
+  let model = await tf.loadGraphModel(model_path, { fromTFHub: true });
   console.timeEnd("model loading time");
   console.time("first prediction");
   const predictions = await runModel(model, tensors, false);
@@ -49,8 +45,8 @@ function average(array) {
 }
 
 function benchmarkInputDefininedInCode() {
-    let tensor1 = tf.ones([256, 256,3]);
+    let tensor1 = tf.ones([224, 224,3]);
     tensor1 = tensor1.expandDims(0);
-    benchmarkInput("https://storage.googleapis.com/tfjs-alok-uplara-abcde/bottoms_gzip/blazeface/tfjs/model.json.gz", [tensor1], 100);
+    benchmarkInput("https://tfhub.dev/google/tfjs-model/imagenet/mobilenet_v2_100_224/feature_vector/2/default/1", [tensor1], 100);
 }
 benchmarkInputDefininedInCode();
