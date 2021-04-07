@@ -1,20 +1,7 @@
 async function runModel(model, tensors, returnTensorReferences ) {
     let num_outputs = model.outputs.length;
-    const predictionsTensor =  await model.executeAsync(tensors, ["module_apply_default/hub_output/feature_vector/SpatialSqueeze"]);
-    if (returnTensorReferences) {
-      return predictionsTensor;
-    } else {
-      if (Array.isArray(predictionsTensor)) {
-        const promises = predictionsTensor.map(x => x.array());
-        const arrayTensor = await Promise.all(promises);
-        tf.dispose(predictionsTensor);
-        return arrayTensor;
-      } else {
-        const arrayTensor = predictionsTensor.arraySync()
-        tf.dispose(predictionsTensor);
-        return arrayTensor;
-      }
-    }
+    const predictionsTensor =  await model.predict(tensors);
+    return predictionsTensor;
 }
 
 
