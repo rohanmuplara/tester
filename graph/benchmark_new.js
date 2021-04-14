@@ -84,4 +84,4 @@ async function benchmarkInputDefininedInCode() {
     benchmarkInput(models, 10);
 }
 
-benchmarkInputDefininedInCode();
+//benchmarkInputDefininedInCode();
