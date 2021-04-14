@@ -66,7 +66,21 @@ async function benchmarkInputDefininedInCode() {
     tf.loadGraphModel("https://storage.googleapis.com/tfjs-alok-uplara-abcde/bottoms_gzip/densepose/densepose_js/model.json.gz")
     ])
     console.timeEnd("tf.loadGraphModeling times");
-       
+    console.log("trying to save the models");
+    for (let i = 0; i < models.length; i++) {
+
+      saved_models = await models[i].save('indexeddb://' + i);
+    }
+    let loadFromDb = [];
+    console.time("loading from storage")
+    for (let i = 0; i < models.length; i++) {
+
+      loadFromDb.push(tf.loadGraphModel('indexeddb://' + i));
+    }
+    await Promise.all(loadFromDb);
+    console.timeEnd("loading from storage")
+
+    console.log("finished saving the models"); 
     benchmarkInput(models, 10);
 }
 
