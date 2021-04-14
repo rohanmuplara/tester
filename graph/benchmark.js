@@ -24,8 +24,7 @@ function average(array) {
 }
 
 function benchmarkInputDefininedInCode() {
-    let tensor1 = tf.ones([256, 256,3]);
-    tensor1 = tensor1.expandDims(0);
-    benchmarkInput("https://storage.googleapis.com/tfjs-alok-uplara-abcde/bottoms_gzip/blazeface/tfjs/model.json.gz", [tensor1], 100);
+    let tensor1 = tf.ones([1, 5]);
+    benchmarkInput("https://storage.googleapis.com/uplara_tfjs/combineddense/model.json", [tensor1], 100);
 }
-
+benchmarkInputDefininedInCode();
