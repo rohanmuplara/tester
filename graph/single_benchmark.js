@@ -27,3 +27,5 @@ function benchmarkInputDefininedInCode() {
     let tensor1 = tf.ones([1,224, 224, 3]);
     benchmarkInput("https://storage.googleapis.com/uplara_tfjs/combinedmobilenet2/model.json", [tensor1], 100);
 }
+
+//benchmarkInputDefininedInCode();
