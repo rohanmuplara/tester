@@ -32,4 +32,4 @@ async function benchmarkStichedInputDefininedInCode() {
     benchmarkStichedInput(models, 10);
 }
 
-benchmarkStichedInputDefininedInCode();
+//benchmarkStichedInputDefininedInCode();
