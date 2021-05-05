@@ -3,13 +3,11 @@ async function benchmarkInput (model_path, tensors, num_runs) {
   let model_loading_begin = window.performance.now();
   let model = await tf.loadGraphModel(model_path);
   let model_loading_end = window.performance.now();
-  let model_loading_time = model_loading_end - model_loading_begin
-  console.log2("model loading time", model_loading_end - model_loading_begin);
+  console.log(model_loading_end - model_loading_begin);
   let first_prediction_begin = window.performance.now();
   const predictions = await runModel(model, tensors, false);
   let first_prediction_end = window.performance.now();
-  let first_prediction_time = first_prediction_end - first_prediction_begin;
-  console.log2("first prediction time" + first_prediction_time);
+  console.log(first_prediction_end - first_prediction_begin);
 
   let subsequent_times =new Float32Array(num_runs - 1);
   for (let i = 0; i < num_runs - 1 ; i++) {
@@ -19,11 +17,8 @@ async function benchmarkInput (model_path, tensors, num_runs) {
     let time = (end-begin) ;
     subsequent_times[i] = time;
   }
-  console.log("the subsequent times are", subsequent_times);
-  console.log2("subsequent predictions are in ms" + subsequent_times);
-  let average_time = average(subsequent_times);
-
-  console.log2("the average is" +  average_time);
+  console.log("subsequent predictions are in ms", subsequent_times);
+  console.log("the average of the subequent predictions are", average(subsequent_times));
 }
 
 function average(array) {
@@ -42,9 +37,9 @@ benchmarkInputDefininedInCode();
     if (!console) {
         console = {};
     }
-    var old = console.log2;
+    var old = console.log;
     var logger = document.getElementById('log');
-    console.log2 = function (message) {
+    console.log = function (message) {
         if (typeof message == 'object') {
             logger.innerHTML += (JSON && JSON.stringify ? JSON.stringify(message) : String(message)) + '<br />';
         } else {
