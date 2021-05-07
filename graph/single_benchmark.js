@@ -36,7 +36,7 @@ function benchmarkInputDefininedInCode() {
     benchmarkInput("https://storage.googleapis.com/uplara_tfjs/seperatemobilenet/model.json", [tensor1], 100);
 }
 
-benchmarkInputDefininedInCode();
+//benchmarkInputDefininedInCode();
 
 (function () {
     if (!console) {

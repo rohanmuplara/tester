@@ -1,17 +1,29 @@
-async function benchmarkStichedInput (models, num_runs) {
+async function benchmarkStichedInput (models, num_runs, executeFirstParallely) {
     
 
-    let model1 = await  tf.loadGraphModel("https://storage.googleapis.com/uplara_tfjs/seperatemobilenet/model.json")
-    let model2 = await  tf.loadGraphModel("https://storage.googleapis.com/uplara_tfjs/seperatemobilenet4/model.json")
-    let tensor3 = [tf.ones([1,224, 224, 3])];
+    let model1 = models[0];
+    let model2 = models[1];
+    let tensor1 = [tf.ones([1,224, 224, 3])];
     let tensor2 = [tf.ones([1,224, 224, 3])];
-  for  (let i = 0; i < num_runs; i++) {
-    console.time("model2  prediction" + i);
-    const predictions2 = await runModel(model2, tensor3, false);
-    console.timeEnd("model2  prediction" + i);
+    let first_run_index = 0;
+    if (executeFirstParallely) {
+      first_run_index = 1;;
+      console.time("first past parallely");
+      await Promise.all([
+        runModel(model1, tensor2, false),
+       runModel(model2, tensor1, false)
+      ]);
+      console.timeEnd("first past parallely");
+    }
+    for  (i = first_run_index; i < num_runs; i++) {
+
     console.time("model1  prediction" + i);
     const predictions1 = await runModel(model1, tensor2, false);
     console.timeEnd("model1  prediction" + i);
+
+    console.time("model2  prediction" + i);
+    const predictions2 = await runModel(model2, tensor1, false);
+    console.timeEnd("model2  prediction" + i);
     console.timeEnd("pass" + i);
   }
 }
@@ -29,7 +41,7 @@ async function benchmarkStichedInputDefininedInCode() {
       tf.loadGraphModel("https://storage.googleapis.com/uplara_tfjs/seperatemobilenet2/model.json")
     ])
     console.timeEnd("tf.loadGraphModeling times");
-    benchmarkStichedInput(models, 10);
+    benchmarkStichedInput(models, 10, false);
 }
 
-//benchmarkStichedInputDefininedInCode();
+benchmarkStichedInputDefininedInCode();
