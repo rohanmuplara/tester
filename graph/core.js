@@ -22,7 +22,12 @@ async function runModel(model, tensorMap, returnTensorReferences ) {
       }
     }
 }
-
+func drawPixelsToCanvas(tensor) {
+  const canvas = document.createElement('canvas');
+  canvas.width = tensor.shape.width
+  canvas.height = tensor.shape.height
+  await tf.browser.toPixels(tensor, canvas);
+}
 function convertMaskToColors(tensor) {
   
 """
