@@ -32,13 +32,9 @@ function average(array) {
 }
 
 function benchmarkInputDefininedInCode() {
-    let tensor1 = tf.ones([1,256, 192, 3]);
-    let tensor2 = tf.ones([1,256, 192, 1]);
-    let tensor3 = tf.ones([1,256, 192, 1]);
-    let tensor4 = tf.ones([1,256, 192, 1]); 
-    let tensor5 = tf.ones([1,256, 192, 1]); 
-    let tensors = [tensor1, tensor2, tensor3, tensor4, tensor5];
-    benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/tps_graph/model.json", tensors, 15)
+    tps_inputs = {"cloth": tf.ones([1,256, 192, 3]), "human_parsing_mask": tf.ones([1,256, 192, 1]), "denspose_mask": tf.ones([1,256, 192, 3]),
+      "cloth_mask": tf.ones([1,256, 192, 1]),  "expected_seg_mask": tf.ones([1,256, 192, 1])}
+    benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/tps_graph/model.json", tps_inputs, 15)
 }
 
 benchmarkInputDefininedInCode();
