@@ -7,7 +7,6 @@ async function benchmarkInput (model_path, tensors, num_runs) {
   console.log2("model loading time", model_loading_end - model_loading_begin);
   let first_prediction_begin = window.performance.now();
   const predictions = await runModel(model, tensors, false);
-  debugger;
   let first_prediction_end = window.performance.now();
   let first_prediction_time = first_prediction_end - first_prediction_begin;
   console.log2("first prediction time" + first_prediction_time);
@@ -36,11 +35,10 @@ function benchmarkInputDefininedInCode() {
     let tensor1 = tf.ones([1,256, 192, 3]);
     let tensor2 = tf.ones([1,256, 192, 1]);
     let tensor3 = tf.ones([1,256, 192, 1]);
-    let tensor4 = tf.ones([1,256, 192, 3]); 
-    let tensor5 = tf.ones([1,256, 192, 5]);
-
-    let tensors = [tensor1, tensor2, tensor3, tensor4];
-    benchmarkInput("https://storage.googleapis.com/uplara_tfjs/tps_tester/tps_model/model.json", tensors, 15)
+    let tensor4 = tf.ones([1,256, 192, 1]); 
+    let tensor5 = tf.ones([1,256, 192, 1]); 
+    let tensors = [tensor1, tensor2, tensor3, tensor4, tensor5];
+    benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/tps_graph/model.json", tensors, 15)
 }
 
 benchmarkInputDefininedInCode();

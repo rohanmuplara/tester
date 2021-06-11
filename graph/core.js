@@ -1,10 +1,11 @@
-async function runModel(model, tensors, returnTensorReferences ) {
+async function runModel(model, tensorMap, returnTensorReferences ) {
     let num_outputs = model.outputs.length;
-    let string_array = ["Identity:0"]; 
-    for (let i = 1; i < num_outputs; i++) {
-      string_array.push("Identity_" + i +":0");
+    let renamedTensorMap = {};
+    for (const tensor_name in  tensorMap) {
+      const new_tensor_name = tensor_name + ":0"
+      renamedTensorMap[new_tensor_name] = tensorMap[tensor_name]
     }
-    const predictionsTensor =  await model.executeAsync(tensors, string_array);
+    const predictionsTensor =  await model.executeAsync(renamedTensorMap);
     if (returnTensorReferences) {
       return predictionsTensor;
     } else {
