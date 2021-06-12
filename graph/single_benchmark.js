@@ -36,7 +36,8 @@ function benchmarkInputDefininedInCode() {
       "cloth_mask": tf.ones([1,256, 192, 1]),  "expected_seg_mask": tf.ones([1,256, 192, 1])}
     sample_inputs = {"a": tf.ones([5, 1])}
     //benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/tps_graph/model.json", tps_inputs, 15)
-    benchmarkInput("https://storage.googleapis.com/uplara_tfjs/small_model/model.json", sample_inputs, 15)
+   person_detection_inputs = {"person": tf.ones([1,256,193,3])}
+    benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/person_detection_graph/model.json", person_detection_inputs, 15)
 }
 
 benchmarkInputDefininedInCode();
