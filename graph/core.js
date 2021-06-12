@@ -1,4 +1,4 @@
-async function runModel(model, tensorMap, returnTensorReferences ) {
+async function runModel(model, tensorMap, tensorOutputNames, returnTensorReferences ) {
     let num_outputs = model.outputs.length;
     let renamedTensorMap = {};
     for (const tensor_name in  tensorMap) {
@@ -7,19 +7,28 @@ async function runModel(model, tensorMap, returnTensorReferences ) {
     }
     const predictionsTensor =  await model.executeAsync(renamedTensorMap);
     if (returnTensorReferences) {
-      return predictionsTensor;
+      return constructMap(tensorOutputNames, predictionsTensor)
     } else {
       if (Array.isArray(predictionsTensor)) {
         const promises = predictionsTensor.map(x => x.array());
         const arrayTensor = await Promise.all(promises);
         tf.dispose(predictionsTensor);
-        return arrayTensor;
+        return constructMap(tensorOutputNames, arrayTensor);
       } else {
         const arrayTensor = predictionsTensor.arraySync()
         tf.dispose(predictionsTensor);
-        return arrayTensor;
+        return constructMap(tensorOutputNames, arrayTensor)
       }
     }
+}
+function constructMap(names, arrayValues) {
+  output_dict = {}
+  for (let i = 0; i < names.length; i++) {
+    let name = names[i]
+    let arrayValue = arrayValues[i]
+    output_dict[name] = arrayValue
+  }
+
 }
 async function drawPixelsToCanvas(tensor) {
   const canvas = document.createElement('canvas');
