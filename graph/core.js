@@ -6,7 +6,6 @@ async function runModel(model, tensorMap, tensorOutputNames, returnTensorReferen
       renamedTensorMap[new_tensor_name] = tensorMap[tensor_name]
     }
     const predictionsTensor =  await model.executeAsync(renamedTensorMap);
-    debugger;
     if (returnTensorReferences) {
       return constructMap(tensorOutputNames, predictionsTensor)
     } else {

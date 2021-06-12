@@ -32,25 +32,23 @@ function average(array) {
 }
 
 function benchmarkInputDefininedInCode() {
-    tps_inputs = {"cloth": tf.ones([1,256, 192, 3]), "human_parsing_mask": tf.ones([1,256, 192, 1]), "denspose_mask": tf.ones([1,256, 192, 1]),
+   let  tps_inputs = {"cloth": tf.ones([1,256, 192, 3]), "human_parsing_mask": tf.ones([1,256, 192, 1]), "denspose_mask": tf.ones([1,256, 192, 1]),
       "cloth_mask": tf.ones([1,256, 192, 1]),  "expected_seg_mask": tf.ones([1,256, 192, 1])}
-   // benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/tps_graph/model.json", tps_inputs, ["warped_cloth", "warped_cloth_mask"], 4)
-   person_detection_inputs = {"person": tf.ones([1,256,193,3])}
-   // benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/person_detection_graph/model.json", person_detection_inputs,["person"],  4)
-   //denspose_inputs = {"person": tf.ones([1,256,192,3])}
-   //benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/denspose_graph/model.json", ["denspose_mask"], denspose_inputs, 4)
-   human_binary_mask_inputs = {"person": tf.ones([1,256, 192, 3]), "denspose_mask": tf.ones([1,256, 192, 1])}
-   //benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/human_binary_graph/model.json", human_binary_mask_inputs, ["human_binary_mask", 4)
-  /human_parsing_inputs =  {"person": tf.ones([1,256, 192, 3]), "human_binary_mask": tf.ones([1,256, 192, 1]), "denspose_mask": tf.ones([1,256, 192, 1])}
-  // benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/human_parsing_graph/model.json", human_parsing_inputs, ["person", "human_parsing_mask"],  4)
-   expected_seg_inputs =  {"person": tf.ones([1,256, 192, 3]), "human_parsing_mask": tf.ones([1,256, 192, 1]), "denspose_mask": tf.ones([1,256, 192, 1]), "cloth": tf.ones([1,256, 192, 3]), "cloth_mask": tf.ones([1,256, 192, 1])}
-   //benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/expected_seg_graph/model.json", expected_seg_inputs, ["expected_seg_mask", 4)
-   cloth_inpainting_inputs =  {"cloth": tf.ones([1,256, 192, 3]), "warped_cloth": tf.ones([1,256, 192, 3]),  "warped_cloth_mask": tf.ones([1,256, 192, 1]), 
-   "expected_seg_mask": tf.ones([1,256, 192, 1])}
-   //benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/cloth_inpainting_graph/model.json", cloth_inpainting_inputs, ["inpainted_cloth"], 4)
-   
-   skin_inpainting_inputs = {"person": tf.ones([1,256, 192, 3]), "human_parsing_mask": tf.ones([1,256, 192, 1]), "expected_seg_mask": tf.ones([1,256, 192, 1]), "inpainted_cloth": tf.ones([1,256, 192, 3])}
-   benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/skin_inpainting_graph/model.json", skin_inpainting_inputs, ["inpainted_cloth"], 4)
+   benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/tps_graph/model.json", tps_inputs, ["warped_cloth", "warped_cloth_mask"], 4)
+   let person_detection_inputs = {"person": tf.ones([1,256,193,3])}
+   benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/person_detection_graph/model.json", person_detection_inputs,["person"],  4)
+   let denspose_inputs = {"person": tf.ones([1,256,192,3])}
+   benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/denspose_graph/model.json", ["denspose_mask"], denspose_inputs, 4)
+   let human_binary_mask_inputs = {"person": tf.ones([1,256, 192, 3]), "denspose_mask": tf.ones([1,256, 192, 1])}
+   benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/human_binary_graph/model.json", human_binary_mask_inputs, ["human_binary_mask"], 4)
+   let human_parsing_inputs =  {"person": tf.ones([1,256, 192, 3]), "human_binary_mask": tf.ones([1,256, 192, 1]), "denspose_mask": tf.ones([1,256, 192, 1])}
+   benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/human_parsing_graph/model.json", human_parsing_inputs, ["person", "human_parsing_mask"],  4)
+   let expected_seg_inputs =  {"person": tf.ones([1,256, 192, 3]), "human_parsing_mask": tf.ones([1,256, 192, 1]), "denspose_mask": tf.ones([1,256, 192, 1]), "cloth": tf.ones([1,256, 192, 3]), "cloth_mask": tf.ones([1,256, 192, 1])}
+   benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/expected_seg_graph/model.json", expected_seg_inputs, ["expected_seg_mask"], 4)
+   let cloth_inpainting_inputs =  {"cloth": tf.ones([1,256, 192, 3]), "warped_cloth": tf.ones([1,256, 192, 3]),  "warped_cloth_mask": tf.ones([1,256, 192, 1]), "expected_seg_mask": tf.ones([1,256, 192, 1])}
+   benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/cloth_inpainting_graph/model.json", cloth_inpainting_inputs, ["inpainted_cloth"], 4)
+   let skin_inpainting_inputs = {"person": tf.ones([1,256, 192, 3]), "human_parsing_mask": tf.ones([1,256, 192, 1]), "expected_seg_mask": tf.ones([1,256, 192, 1]), "inpainted_cloth": tf.ones([1,256, 192, 3])}
+   benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/skin_inpainting_graph2/model.json", skin_inpainting_inputs, ["person"], 4)
 }
 
 benchmarkInputDefininedInCode();
