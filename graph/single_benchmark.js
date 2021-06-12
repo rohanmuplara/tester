@@ -37,7 +37,18 @@ function benchmarkInputDefininedInCode() {
     sample_inputs = {"a": tf.ones([5, 1])}
     //benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/tps_graph/model.json", tps_inputs, 15)
    person_detection_inputs = {"person": tf.ones([1,256,193,3])}
-    benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/person_detection_graph/model.json", person_detection_inputs, 15)
+   // benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/person_detection_graph/model.json", person_detection_inputs, 15)
+   //denspose_inputs = {"person": tf.ones([1,256,192,3])}
+   //benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/denspose_graph/model.json", denspose_inputs, 15)
+   human_binary_mask_inputs = {"person": tf.ones([1,256, 192, 3]), "denspose_mask": tf.ones([1,256, 192, 1])}
+   //benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/human_binary_graph/model.json", human_binary_mask_inputs, 15)
+   human_parsing_inputs =  {"person": tf.ones([1,256, 192, 3]), "human_binary_mask": tf.ones([1,256, 192, 1]), "denspose_mask": tf.ones([1,256, 192, 1])}
+   //benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/human_parsing_graph/model.json", human_parsing_inputs, 15)
+   expected_seg_inputs =  {"person": tf.ones([1,256, 192, 3]), "human_parsing_mask": tf.ones([1,256, 192, 1]), "denspose_mask": tf.ones([1,256, 192, 1]), "cloth": tf.ones([1,256, 192, 3]), "cloth_mask": tf.ones([1,256, 192, 1])}
+   //benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/expected_seg_graph/model.json", expected_seg_inputs, 15)
+   cloth_inpainting_inputs =  {"cloth": tf.ones([1,256, 192, 3]), "warped_cloth": tf.ones([1,256, 192, 3]),  "warped_cloth_mask": tf.ones([1,256, 192, 1]), 
+   "expected_seg_mask": tf.ones([1,256, 192, 1])}
+   benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/cloth_inpainting_graph/model.json", cloth_inpainting_inputs, 15)
 }
 
 benchmarkInputDefininedInCode();
