@@ -6,6 +6,7 @@ async function runModel(model, tensorMap, tensorOutputNames, returnTensorReferen
       renamedTensorMap[new_tensor_name] = tensorMap[tensor_name]
     }
     const predictionsTensor =  await model.executeAsync(renamedTensorMap);
+    debugger;
     if (returnTensorReferences) {
       return constructMap(tensorOutputNames, predictionsTensor)
     } else {
@@ -76,8 +77,6 @@ function convertMaskToColors(tensor) {
     return tf.gather(colors, mask)
 }
 
-
-
 function download(filename, text) {
     var element = document.createElement('a');
 
@@ -99,4 +98,3 @@ function testUploadedTensor(array) {
     console.log("the tensor insider is test uploaded array is", tensor);
     benchmarkInput([tensor], 10);
 }
-
