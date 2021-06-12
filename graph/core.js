@@ -28,13 +28,14 @@ func drawPixelsToCanvas(tensor) {
   canvas.height = tensor.shape.height
   await tf.browser.toPixels(tensor, canvas);
 }
+/*
+This takes a raw mask and gives it colors. This is noninituive and little hacking of the api. The params is actually the color array and the mask is indicies
+as each mask has a class(integer) that corresponds to the collars array. The batch size,width,height is from mask
+and the depth is from the colors array.
+*/
+
 function convertMaskToColors(tensor) {
   
-"""
-This takes a raw mask and gives it colors. This is noninituive and little hacking of the api. The params is actually the color array and the mask is indicies
-as each mask has a class(integer) that corresponds to the collars array. The batch size,width,height is from mask 
-and the depth is from the colors array.
-"""
 def convert_mask_colors(mask):
     colors = tf.tensor(
         [
@@ -68,9 +69,6 @@ def convert_mask_colors(mask):
     )
     return tf.gather(colors, mask)
 }
-
-
-
 
 
 
