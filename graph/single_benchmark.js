@@ -34,7 +34,7 @@ function average(array) {
 function benchmarkInputDefininedInCode() {
     tps_inputs = {"cloth": tf.ones([1,256, 192, 3]), "human_parsing_mask": tf.ones([1,256, 192, 1]), "denspose_mask": tf.ones([1,256, 192, 3]),
       "cloth_mask": tf.ones([1,256, 192, 1]),  "expected_seg_mask": tf.ones([1,256, 192, 1])}
-    sample_inputs = {"a": tf.ones([5])}
+    sample_inputs = {"a": tf.ones([5, 1])}
     //benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/tps_graph/model.json", tps_inputs, 15)
     benchmarkInput("https://storage.googleapis.com/uplara_tfjs/small_model/model.json", sample_inputs, 15)
 }

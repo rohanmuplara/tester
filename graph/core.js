@@ -1,6 +1,5 @@
 async function runModel(model, tensorMap, returnTensorReferences ) {
     let num_outputs = model.outputs.length;
-    debugger;
     let renamedTensorMap = {};
     for (const tensor_name in  tensorMap) {
       const new_tensor_name = tensor_name + ":0"
@@ -22,7 +21,7 @@ async function runModel(model, tensorMap, returnTensorReferences ) {
       }
     }
 }
-func drawPixelsToCanvas(tensor) {
+async function drawPixelsToCanvas(tensor) {
   const canvas = document.createElement('canvas');
   canvas.width = tensor.shape.width
   canvas.height = tensor.shape.height
@@ -35,8 +34,6 @@ and the depth is from the colors array.
 */
 
 function convertMaskToColors(tensor) {
-  
-def convert_mask_colors(mask):
     colors = tf.tensor(
         [
             [0, 0, 0],
