@@ -1,6 +1,6 @@
 import * as tf from "@tensorflow/tfjs";
 import { drawPixelsToCanvas, runModel } from "./core";
-class End_to_End_Tops {
+export class End_to_End_Tops {
   models_dict: any;
 
   constructor() {
@@ -25,7 +25,7 @@ class End_to_End_Tops {
         "https://storage.googleapis.com/uplara_tfjs/newest_rohan/skin_inpainting_graph2/model.json",
     };
   }
-  async initializeModel(models_paths_dict: [string: string]) {
+  async initializeModel(models_paths_dict: Map<string, string>) {
     this.models_dict = await Promise.all(
       Object.entries(models_paths_dict).map(
         async ([model_name, model_path]) => [

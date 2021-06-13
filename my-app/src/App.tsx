@@ -1,12 +1,11 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useRef } from "react";
+import "./App.css";
+import { End_to_End_Tops } from "./run";
 
 function App() {
-  return (
-    <div className="App">
-    </div>
-  );
+  const refContainer = useRef(new End_to_End_Tops());
+
+  return <div className="App"></div>;
 }
 
 export default App;
