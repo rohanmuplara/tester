@@ -23,12 +23,17 @@ async function runModel(model, tensorMap, tensorOutputNames, returnTensorReferen
 }
 function constructMap(names, arrayValues) {
   output_dict = {}
-  for (let i = 0; i < names.length; i++) {
-    let name = names[i]
-    let arrayValue = arrayValues[i]
-    output_dict[name] = arrayValue
+  // if there is only 1 output tensor, tfjs returns it instead of an array of length 1 so can't iterate like below
+  if (names.length === 1) {
+    output_dict[names[0]] = arrayValues
+  } else {
+    for (let i = 0; i < names.length; i++) {
+      let name = names[i]
+      let arrayValue = arrayValues[i]
+      output_dict[name] = arrayValue
+    }
   }
-
+  return output_dict;
 }
 async function drawPixelsToCanvas(tensor) {
   const canvas = document.createElement('canvas');
