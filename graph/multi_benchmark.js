@@ -1,52 +1,15 @@
 async function benchmarkInput (models, num_runs) {
-    let grapyModel = models[0];
-    let segModel = models[1];
-    let tpsModel = models[2];
-    let tomModel = models[3];
-    let blazefaceModel = models[4];
-    let densposeModel = models[5];
-    let tensor1 = tf.ones([1, 256, 192,3]);
-    let grapyTensor = [tf.ones([1, 512, 256, 3])];
-    let densposeTensor = [tf.ones([1, 256, 192, 3])];
-    let blazefaceTensor = [tf.ones([1, 256, 256, 3])];
-    let tomTensor = [tensor1, tensor1, tf.ones([1, 256, 192, 1])];
-    let segTensor = [tf.ones([1, 256, 192, 1]), tf.ones([1, 256, 192, 27]), tensor1, tf.ones([1, 256, 192, 1]), tensor1]
-    let tpsTensor = [tensor1, tf.ones([1, 256, 192, 1]), tf.ones([1, 256, 192, 1]), tensor1, tensor1];
-  for  (let i = 0; i < num_runs; i++) {
-  console.time("first pass");
-  console.time("first grapy prediction");
-  const predictionsgrapy = await runModel(grapyModel, grapyTensor, false);
-  console.timeEnd("first grapy prediction");
-  console.time("first seg prediction");
-  const predictionsseg = await runModel(segModel, segTensor, false);
-  console.timeEnd("first seg prediction");
-  console.time("first tps prediction");
-  const predictionstps = await runModel(tpsModel, tpsTensor, false);
-  console.timeEnd("first tps prediction");
-  console.time("first tom prediction");
-  const predictionstom = await runModel(tomModel, tomTensor, false);
-  console.timeEnd("first tom prediction");
-  console.time("first blazeface prediction");
-  const predictionsblazeface = await runModel(blazefaceModel, blazefaceTensor, false);
-  console.timeEnd("first blazeface prediction");
-  console.time("first denspose prediction");
-  const predictionsdenspose = await runModel(densposeModel, densposeTensor, false);
-  console.timeEnd("first denspose prediction");
-  console.timeEnd("first pass");
-
-  }
-
-
-  let subsequent_times =new Float32Array(num_runs - 1);
-  for (let i = 0; i < num_runs - 1 ; i++) {
-    let begin= window.performance.now();
-    const predictions = await runModel(model, tensors, false);
-    let end= window.performance.now();
-    let time = (end-begin) ;
-    subsequent_times[i] = time;
-  }
-  console.log("subsequent predictions are in ms", subsequent_times);
-  console.log("the average of the subequent predictions are", average(subsequent_times));
+      let person = tf.ones([1,256,192,3])
+      let person_detection = models["person_detection"]
+      debugger;
+      let person_detection_output = await runModel(models["person_detection"], {"person": person}, ["person"], false);
+      let denspose_output = await runModel(models["denspose"], {"person": person_detection_output["person"]}, ["person"], false);
+      let human_binary_mask_output = await runModel(models["human_binary_mask"], {"person": person_detection_output["person"], "denspose_mask": denspose_output["denspose_mask"]}, ["human_binary_mask"], false);
+      let human_parsing_output = await runModel(models["human_parsing"], {"person": person_detection_output["person"], "denspose_mask": denspose_output["denspose_mask"], "human_binary_mask":  human_binary_mask_output["human_binary_mask"]}, ["person","human_parsing_mask" ], false);
+      let expected_seg_output = await runModel(models["expected_seg"], {"person": human_parsing_output["person"], "cloth": cloth_graph_outputs["cloth"], "cloth_mask": cloth_graph_outputs["cloth_mask"], "denspose_mask": denspose_output["denspose_mask"], "human_parsing_mask": human_parsing_output["human_parsing_mask"]},["expected_seg_mask"], false);
+      let tps_output = await runModel(models["tps"], {"expected_seg_mask": expected_seg_output["expected_seg_mask"], "cloth": cloth_graph_outputs["cloth"], "cloth_mask": cloth_graph_outputs["cloth_mask"]}, ["warped_cloth", "warped_cloth_mask"], false);
+      let cloth_inpainting_output = await runModel(models["cloth_inpainting"], {"warped_cloth": tps_output["warped_cloth"], "warped_cloth_mask":tps_output["warped_cloth_mask"],"cloth": cloth_graph_outputs["cloth"], "expected_seg_mask": expected_seg_output["expected_seg_mask"]}, ["inpainted_cloth"], false);
+      let skin_inpainting_output = await runModel(models["sking_inpainting"], {"person": human_parsing_output["person"], "human_parsing_mask": human_parsing_output["human_parsing_mask"], "expected_seg_mask": expected_seg_output["expected_seg_mask"], "inpainted_cloth": cloth_inpainting_out["inpainted_cloth"]}, ["person"], false);
 }
 
 function average(array) {
@@ -55,33 +18,22 @@ function average(array) {
 }
 
 async function benchmarkInputDefininedInCode() {
-   console.log("tf.loadGraphModeling time");
-   console.time("tf.loadGraphModeling times");
-    let models = await Promise.all([
-      tf.loadGraphModel("https://storage.googleapis.com/tfjs-alok-uplara-abcde/bottoms_gzip/grapy/atr_512_256_mobilenet_edge_loss_1/tfjs/model.json.gz"),
-      tf.loadGraphModel("https://storage.googleapis.com/tfjs-alok-uplara-abcde/bottoms_gzip/tops/expseg/expected_seg_debug/tfjs/model.json.gz"),
-    tf.loadGraphModel("https://storage.googleapis.com/tfjs-alok-uplara-abcde/bottoms_gzip/tops/tps/short_tshirts_default/tfjs/model.json.gz"),
-    tf.loadGraphModel("https://storage.googleapis.com/tfjs-alok-uplara-abcde/bottoms_gzip/tops/tom/model_60/tfjs/model.json.gz"),
-    tf.loadGraphModel("https://storage.googleapis.com/tfjs-alok-uplara-abcde/bottoms_gzip/blazeface/tfjs/model.json.gz"),
-    tf.loadGraphModel("https://storage.googleapis.com/tfjs-alok-uplara-abcde/bottoms_gzip/densepose/densepose_js/model.json.gz")
-    ])
-    console.timeEnd("tf.loadGraphModeling times");
-    console.log("trying to save the models");
-    for (let i = 0; i < models.length; i++) {
-
-      saved_models = await models[i].save('indexeddb://' + i);
-    }
-    let loadFromDb = [];
-    console.time("loading from storage")
-    for (let i = 0; i < models.length; i++) {
-
-      loadFromDb.push(tf.loadGraphModel('indexeddb://' + i));
-    }
-    await Promise.all(loadFromDb);
-    console.timeEnd("loading from storage")
-
-    console.log("finished saving the models"); 
+  let model_paths_dict = {"tps": "https://storage.googleapis.com/uplara_tfjs/newest_rohan/tps_graph/model.json", 
+                "person_detection": "https://storage.googleapis.com/uplara_tfjs/newest_rohan/person_detection_graph/model.json",
+               "denspose":"https://storage.googleapis.com/uplara_tfjs/newest_rohan/person_detection_graph/model.json",
+               "human_binary": "https://storage.googleapis.com/uplara_tfjs/newest_rohan/human_binary_graph/model.json",
+               "human_parsing": "https://storage.googleapis.com/uplara_tfjs/newest_rohan/human_parsing_graph/model.json",
+               "expected_seg": "https://storage.googleapis.com/uplara_tfjs/newest_rohan/expected_seg_graph/model.json",
+               "tps":  "https://storage.googleapis.com/uplara_tfjs/newest_rohan/tps_graph/model.json", 
+               "cloth_inpainting": "https://storage.googleapis.com/uplara_tfjs/newest_rohan/cloth_inpainting_graph/model.json",
+            "skin_inpainting": "https://storage.googleapis.com/uplara_tfjs/newest_rohan/skin_inpainting_graph2/model.json"};
+   let models_dict = {};
+   debugger;
+   return Promise.all(
+      Object.entries(model_paths_dict).map(async ([model_name, model_path]) => [model_name, await tf.loadGraphModel(model_path)]
+    )).then(Object.fromEntries);
+     debugger;
     benchmarkInput(models, 10);
 }
 
-//benchmarkInputDefininedInCode();
+benchmarkInputDefininedInCode();
