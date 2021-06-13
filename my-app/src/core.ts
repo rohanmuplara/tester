@@ -1,6 +1,6 @@
 import * as tf from "@tensorflow/tfjs";
 
-async function runModel(
+export async function runModel(
   model: tf.GraphModel,
   tensorMap: any,
   tensorOutputNames: string[],
@@ -27,7 +27,7 @@ async function runModel(
     }
   }
 }
-function constructMap(names: string[], arrayValues: any) {
+export function constructMap(names: string[], arrayValues: any) {
   let output_dict: any = {};
   // if there is only 1 output tensor, tfjs returns it instead of an array of length 1 so can't iterate like below
   if (names.length === 1) {
@@ -42,7 +42,7 @@ function constructMap(names: string[], arrayValues: any) {
   return output_dict;
 }
 
-async function drawPixelsToCanvas(tensor: tf.Tensor) {
+export async function drawPixelsToCanvas(tensor: tf.Tensor) {
   const canvas = document.createElement("canvas");
   canvas.width = tensor.shape[0];
   canvas.height = tensor.shape[1]!;
@@ -56,7 +56,7 @@ as each mask has a class(integer) that corresponds to the collars array. The bat
 and the depth is from the colors array.
 */
 
-function convertMaskToColors(mask: tf.Tensor) {
+export function convertMaskToColors(mask: tf.Tensor) {
   let colors = tf.tensor([
     [0, 0, 0],
     [255, 0, 0],
