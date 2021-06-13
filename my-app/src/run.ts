@@ -122,8 +122,7 @@ export class End_to_End_Tops {
   }
 
   async complete_process() {
-    debugger;
-    let cloth_graph_outputs = {
+     let cloth_graph_outputs = {
       cloth_mask: tf.ones([1, 256, 192, 1]),
       cloth: tf.ones([1, 256, 192, 3]),
     };
@@ -131,4 +130,5 @@ export class End_to_End_Tops {
     let person_graph_outputs = await this.person_graph(person);
     await this.tryon_graph(cloth_graph_outputs, person_graph_outputs);
   }
+ 
 }

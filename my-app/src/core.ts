@@ -87,3 +87,31 @@ export function convertMaskToColors(mask: tf.Tensor) {
   ]);
   return tf.gather(colors, mask);
 }
+
+async function downloadImage(image_url: string) {
+  let image = new Image();
+  image.crossOrigin = "anonymous";
+  let image_promise = onload2promise(image);
+  image.src = image_url;
+  await image_promise;
+  return image;
+}
+
+export async function convertMaskUrlToTensor(mask_url: string) {
+  let mask_image = await downloadImage(mask_url);
+  return tf.browser.fromPixels(mask_image, 1);
+}
+
+export async function convertImagerlToTensor(image_url: string) {
+  let image = await downloadImage(image_url);
+  return tf.browser.fromPixels(image, 3);
+}
+
+interface OnLoadAble {
+  onload: any;
+}
+function onload2promise<T extends OnLoadAble>(obj: T): Promise<T> {
+  return new Promise((resolve, reject) => {
+    obj.onload = () => resolve(obj);
+  });
+}
