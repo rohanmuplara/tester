@@ -42,13 +42,17 @@ export function constructMap(names: string[], arrayValues: any) {
   return output_dict;
 }
 
-export async function drawPixelsToCanvas(tensor: tf.Tensor) {
+export async function drawPixelsToCanvas(tensor: tf.Tensor, name: string) {
   const canvas = document.createElement("canvas");
   canvas.width = tensor.shape[0];
   canvas.height = tensor.shape[1]!;
   let squeezed_tensor: tf.Tensor3D = tf.squeeze(tensor, [0]);
   let squeezed_int_tensor = tf.cast(squeezed_tensor, "int32");
   await tf.browser.toPixels(squeezed_int_tensor, canvas)!;
+  let fake_link = document.createElement("a");
+  fake_link.download = name;
+  fake_link.href = canvas.toDataURL();
+  fake_link.click();
 }
 /*
 This takes a raw mask and gives it colors. This is noninituive and little hacking of the api. The params is actually the color array and the mask is indicies
@@ -85,7 +89,10 @@ export function convertMaskToColors(mask: tf.Tensor) {
     [110, 103, 165],
     [105, 245, 12],
   ]);
-  return tf.gather(colors, mask);
+  colors = tf.cast(colors, "int32");
+  mask = tf.cast(mask, "int32");
+  let spliced_mask = tf.squeeze(mask, [-1]);
+  return tf.gather(colors, spliced_mask);
 }
 
 async function downloadImage(image_url: string) {
@@ -102,9 +109,26 @@ export async function convertMaskUrlToTensor(mask_url: string) {
   return tf.browser.fromPixels(mask_image, 1);
 }
 
-export async function convertImagerlToTensor(image_url: string) {
+export async function convertImageUrlToTensor(image_url: string) {
   let image = await downloadImage(image_url);
   return tf.browser.fromPixels(image, 3);
+}
+
+export async function handle_image_load(files: [any]) {
+  console.log("in handle image load");
+  let image = new Image();
+  let fr = new FileReader();
+
+  fr.onload = function () {
+    image.src = fr.result as string;
+  };
+  let image_promise = onload2promise(image);
+  fr.readAsDataURL(files[0]);
+  console.log("awaiting image promise");
+  await image_promise;
+  let result = tf.browser.fromPixels(image, 3);
+
+  return result;
 }
 
 interface OnLoadAble {

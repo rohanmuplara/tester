@@ -1,5 +1,12 @@
 import * as tf from "@tensorflow/tfjs";
-import { drawPixelsToCanvas, runModel } from "./core";
+import {
+  drawPixelsToCanvas,
+  handle_image_load,
+  runModel,
+  convertMaskUrlToTensor,
+  convertImageUrlToTensor,
+  convertMaskToColors,
+} from "./core";
 export class End_to_End_Tops {
   models_dict: any;
 
@@ -26,6 +33,11 @@ export class End_to_End_Tops {
     };
   }
   async initializeModel(models_paths_dict: Map<string, string>) {
+    let cloth_mask_tensor = await convertMaskUrlToTensor(
+      "https://storage.googleapis.com/uplara_tfjs/cloth_images/a/cloth_mask_raw.png"
+    );
+    cloth_mask_tensor = tf.cast(cloth_mask_tensor, "float32");
+    debugger;
     this.models_dict = await Promise.all(
       Object.entries(models_paths_dict).map(
         async ([model_name, model_path]) => [
@@ -39,11 +51,17 @@ export class End_to_End_Tops {
 
   async person_graph(person: tf.Tensor) {
     person = tf.expandDims(person, 0);
+    person = tf.cast(person, "float32");
+    await drawPixelsToCanvas(person, "initial person image.png");
     let person_detection_output = await runModel(
       this.models_dict["person_detection"],
       { person: person },
       ["person"],
       true
+    );
+    await drawPixelsToCanvas(
+      person_detection_output["person"],
+      "person_detection.png"
     );
     let denspose_output = await runModel(
       this.models_dict["denspose"],
@@ -70,10 +88,34 @@ export class End_to_End_Tops {
       ["person", "human_parsing_mask"],
       true
     );
+    await drawPixelsToCanvas(
+      human_parsing_output["person"],
+      "human_parsing_output.png"
+    );
     return Object.assign({}, human_parsing_output, denspose_output);
   }
 
   async tryon_graph(cloth_graph_outputs: any, person_graph_outputs: any) {
+    drawPixelsToCanvas(
+      convertMaskToColors(cloth_graph_outputs["cloth_mask"]),
+      "expected_seg_input_cloth_mask.png"
+    );
+    drawPixelsToCanvas(
+      convertMaskToColors(person_graph_outputs["denspose_mask"]),
+      "expected_seg_input_denspose_mask.png"
+    );
+    drawPixelsToCanvas(
+      convertMaskToColors(person_graph_outputs["human_parsing_mask"]),
+      "expected_seg_input_human_parsing_mask.png"
+    );
+    drawPixelsToCanvas(
+      person_graph_outputs["person"],
+      "expected_seg_input_person.png"
+    );
+    drawPixelsToCanvas(
+      cloth_graph_outputs["cloth"],
+      "expected_seg_input_cloth.png"
+    );
     let expected_seg_output = await runModel(
       this.models_dict["expected_seg"],
       {
@@ -86,6 +128,10 @@ export class End_to_End_Tops {
       ["expected_seg_mask"],
       true
     );
+    drawPixelsToCanvas(
+      convertMaskToColors(expected_seg_output["expected_seg_mask"]),
+      "expected_seg_output.png"
+    );
     let tps_output = await runModel(
       this.models_dict["tps"],
       {
@@ -96,6 +142,7 @@ export class End_to_End_Tops {
       ["warped_cloth", "warped_cloth_mask"],
       true
     );
+    drawPixelsToCanvas(tps_output["warped_cloth"], "warped_cloth.png");
     let cloth_inpainting_output = await runModel(
       this.models_dict["cloth_inpainting"],
       {
@@ -118,11 +165,14 @@ export class End_to_End_Tops {
       ["person"],
       true
     );
-    drawPixelsToCanvas(skin_inpainting_output["person"]);
+    drawPixelsToCanvas(
+      skin_inpainting_output["person"],
+      "skin_inpainting_output.png"
+    );
   }
 
   async complete_process() {
-     let cloth_graph_outputs = {
+    let cloth_graph_outputs = {
       cloth_mask: tf.ones([1, 256, 192, 1]),
       cloth: tf.ones([1, 256, 192, 3]),
     };
@@ -130,5 +180,29 @@ export class End_to_End_Tops {
     let person_graph_outputs = await this.person_graph(person);
     await this.tryon_graph(cloth_graph_outputs, person_graph_outputs);
   }
- 
+
+  async handle_person_upload(files: [any]) {
+    let person_tensor = await handle_image_load(files);
+    let cloth_tensor = await convertImageUrlToTensor(
+      "https://storage.googleapis.com/uplara_tfjs/cloth_images/a/cloth_raw.png"
+    );
+    cloth_tensor = tf.expandDims(cloth_tensor, 0);
+    cloth_tensor = tf.cast(cloth_tensor, "float32");
+    let cloth_mask_tensor = await convertMaskUrlToTensor(
+      "https://storage.googleapis.com/uplara_tfjs/cloth_images/a/cloth_mask_raw.png"
+    );
+    cloth_mask_tensor = tf.expandDims(cloth_mask_tensor);
+    cloth_mask_tensor = tf.div(cloth_mask_tensor, 51);
+    cloth_mask_tensor = tf.cast(cloth_mask_tensor, "float32");
+    let cloth_graph_outputs = {
+      cloth_mask: cloth_mask_tensor,
+      cloth: cloth_tensor,
+    };
+    cloth_mask_tensor = tf.expandDims(cloth_mask_tensor, 0);
+    let person_graph_outputs = await this.person_graph(person_tensor);
+    let tryon_outputs = this.tryon_graph(
+      cloth_graph_outputs,
+      person_graph_outputs
+    );
+  }
 }

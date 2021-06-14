@@ -1,12 +1,18 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import "./App.css";
 import { End_to_End_Tops } from "./run";
 
 function App() {
-  const refContainer = useRef(new End_to_End_Tops());
+  const refContainer = useRef<End_to_End_Tops>();
+  useEffect(() => {
+    // Update the document title using the browser API
+    refContainer.current = new End_to_End_Tops();
+  }, []);
+
   const onDrop = useCallback((acceptedFiles) => {
     console.log("the accepted files are" + acceptedFiles);
+    refContainer.current!.handle_person_upload(acceptedFiles);
   }, []);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
   return (
