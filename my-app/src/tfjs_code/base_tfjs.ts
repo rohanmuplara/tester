@@ -132,7 +132,7 @@ export abstract class BaseTfjs {
     );
     return tryon_outputs;
   }
-  unloadModelFromGpu(): void {
+  disposeModelFromGpu(): void {
     if (this.models_map) {
       this.models_map.forEach((model: tf.GraphModel, _) => {
         model.dispose();

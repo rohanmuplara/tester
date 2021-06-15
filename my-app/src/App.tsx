@@ -10,6 +10,7 @@ function App() {
   useEffect(() => {
     // Update the document title using the browser API
     refContainer.current = new Tops_Tfjs();
+    return refContainer.current.disposeModelFromGpu();
   }, []);
 
   const onDrop = useCallback(async (acceptedFiles) => {
