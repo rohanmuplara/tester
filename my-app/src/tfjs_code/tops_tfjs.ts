@@ -1,7 +1,7 @@
 import * as tf from "@tensorflow/tfjs";
 import { NamedTensorMap } from "@tensorflow/tfjs";
+import { BaseTfjs, NamedModelPathMap } from "./base_tfjs";
 import { runModel } from "./core";
-import { BaseTfjs, NamedModelPathMap } from "./BaseTfjs";
 export class Tops_Tfjs extends BaseTfjs {
   getModelsPathDict(): NamedModelPathMap {
     return {

@@ -1,6 +1,5 @@
 import * as tf from "@tensorflow/tfjs";
-
-
+import { downloadImage } from "./image_utils";
 
 /**
  * Tensor references are way more efficent because they don't come back from the gpu to the cpu.
@@ -115,44 +114,14 @@ export function convertMaskToColors(mask: tf.Tensor) {
   return tf.gather(colors, spliced_mask);
 }
 
-async function downloadImage(image_url: string) {
-  let image = new Image();
-  image.crossOrigin = "anonymous";
-  let image_promise = onload2promise(image);
-  image.src = image_url;
-  await image_promise;
-  return image;
-}
-
 export async function convertMaskUrlToTensor(mask_url: string) {
   let mask_image = await downloadImage(mask_url);
-  return tf.browser.fromPixels(mask_image, 1);
+  let mask_tensor = tf.browser.fromPixels(mask_image, 1);
+  return tf.expandDims(mask_tensor, 0);
 }
 
 export async function convertImageUrlToTensor(image_url: string) {
   let image = await downloadImage(image_url);
-  return tf.browser.fromPixels(image, 3);
-}
-
-export async function handle_image_load(files: [any]) {
-  let image = new Image();
-  let fr = new FileReader();
-
-  fr.onload = function () {
-    image.src = fr.result as string;
-  };
-  let image_promise = onload2promise(image);
-  fr.readAsDataURL(files[0]);
-  await image_promise;
-  let result = tf.browser.fromPixels(image, 3);
-  return result;
-}
-
-interface OnLoadAble {
-  onload: any;
-}
-function onload2promise<T extends OnLoadAble>(obj: T): Promise<T> {
-  return new Promise((resolve, reject) => {
-    obj.onload = () => resolve(obj);
-  });
+  let image_tensor = tf.browser.fromPixels(image, 3);
+  return tf.expandDims(image_tensor, 0);
 }

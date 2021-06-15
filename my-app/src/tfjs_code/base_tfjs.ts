@@ -1,6 +1,6 @@
 import * as tf from "@tensorflow/tfjs";
 import { NamedTensorMap } from "@tensorflow/tfjs";
-import { runModel, convertMaskUrlToTensor, handle_image_load } from "./core";
+import { convertMaskUrlToTensor, convertImageUrlToTensor } from "./core";
 
 // copied naming patterns from tfjs
 export type NamedModelMap = {
@@ -12,6 +12,8 @@ export type NamedModelPathMap = {
 };
 export abstract class BaseTfjs {
   models_map: Map<string, tf.GraphModel> | undefined;
+
+  models_present_indexdb_set: Set<string>;
 
   abstract getModelsPathDict(): NamedModelPathMap;
 
@@ -41,16 +43,21 @@ export abstract class BaseTfjs {
   }
 
   constructor() {
+    this.models_present_indexdb_set = new Set<string>();
     this.initializeProcess();
   }
 
   async initializeProcess() {
     let modelsPath = this.getModelsPathDict();
     await this.initializeModels(modelsPath);
-    this.runModelWithDummyInputs();
+    await this.runModelWithDummyInputs();
     this.download_models_to_index_db();
   }
 
+  /**
+   *
+   * have seperate dic for in disk so caller doesn't have to worry about this
+   */
   async initializeModels(models_paths_dict: Object) {
     let models_entries = (await Promise.all(
       Object.entries(models_paths_dict).map(
@@ -58,6 +65,7 @@ export abstract class BaseTfjs {
           let index_path = "indexeddb://" + model_name;
           let model = await tf.loadGraphModel(index_path).then(
             (value: tf.GraphModel) => {
+              this.models_present_indexdb_set.add(model_name);
               return value;
             },
             (_) => {
@@ -72,8 +80,10 @@ export abstract class BaseTfjs {
   }
   download_models_to_index_db() {
     this.models_map!.forEach((model, model_name) => {
-      let index_path = "indexeddb://" + model_name;
-      model.save(index_path);
+      if (!this.models_present_indexdb_set.has(model_name)) {
+        let index_path = "indexeddb://" + model_name;
+        model.save(index_path);
+      }
     });
   }
 
@@ -90,29 +100,31 @@ export abstract class BaseTfjs {
     let person_graph_outputs = await this.person_graph(person_input);
     this.tryon_graph(cloth_graph_outputs, person_graph_outputs);
   }
-
-  async handle_person_upload(files: [any]) {
-    let person_tensor = await handle_image_load(files);
-    let cloth_tensor = await convertImageUrlToTensor(
-      "https://storage.googleapis.com/uplara_tfjs/cloth_images/a/cloth_raw.png"
-    );
-    cloth_tensor = tf.expandDims(cloth_tensor, 0);
+  async runModel(
+    cloth_path: string,
+    cloth_mask_path: string,
+    person_path: string,
+    person: tf.Tensor3D
+  ) {
+    let cloth_tensor = await convertImageUrlToTensor(cloth_path);
     cloth_tensor = tf.cast(cloth_tensor, "float32");
-    let cloth_mask_tensor = await convertMaskUrlToTensor(
-      "https://storage.googleapis.com/uplara_tfjs/cloth_images/a/cloth_mask_raw.png"
-    );
-    cloth_mask_tensor = tf.expandDims(cloth_mask_tensor);
+    let cloth_mask_tensor = await convertMaskUrlToTensor(cloth_mask_path);
     cloth_mask_tensor = tf.div(cloth_mask_tensor, 51);
     cloth_mask_tensor = tf.cast(cloth_mask_tensor, "float32");
     let cloth_graph_outputs = {
       cloth_mask: cloth_mask_tensor,
       cloth: cloth_tensor,
     };
-    cloth_mask_tensor = tf.expandDims(cloth_mask_tensor, 0);
-    let person_graph_outputs = await this.person_graph(person_tensor);
+    person = tf.expandDims(person, 0);
+
+    let person_inputs = {
+      person: person,
+    };
+    let person_graph_outputs = await this.person_graph(person_inputs);
     let tryon_outputs = this.tryon_graph(
       cloth_graph_outputs,
       person_graph_outputs
     );
+    return tryon_outputs;
   }
 }
