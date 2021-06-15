@@ -1,19 +1,9 @@
 import * as tf from "@tensorflow/tfjs";
-import {
-  downloadTensorAsImage,
-  handle_image_load,
-  runModel,
-  convertMaskUrlToTensor,
-  convertImageUrlToTensor,
-  convertMaskToColors,
-} from "./core";
-export class End_to_End_Tops {
-  models_map: Map<string, tf.GraphModel> | undefined;
-
-  constructor() {
-    this.initializeModel(this.getModelsPathDict());
-  }
-  getModelsPathDict(): any {
+import { NamedTensorMap } from "@tensorflow/tfjs";
+import { runModel } from "./core";
+import { BaseTfjs, NamedModelPathMap } from "./BaseTfjs";
+export class Tops_Tfjs extends BaseTfjs {
+  getModelsPathDict(): NamedModelPathMap {
     return {
       person_detection:
         "https://storage.googleapis.com/uplara_tfjs/newest_rohan/person_detection_graph/model.json",
@@ -32,38 +22,9 @@ export class End_to_End_Tops {
         "https://storage.googleapis.com/uplara_tfjs/newest_rohan/skin_inpainting_graph2/model.json",
     };
   }
-  async initializeModel(models_paths_dict: Map<string, string>) {
-    let cloth_mask_tensor = await convertMaskUrlToTensor(
-      "https://storage.googleapis.com/uplara_tfjs/cloth_images/a/cloth_mask_raw.png"
-    );
-    cloth_mask_tensor = tf.cast(cloth_mask_tensor, "float32");
-    let models_entries = (await Promise.all(
-      Object.entries(models_paths_dict).map(
-        async ([model_name, model_path]) => {
-          let index_path = "indexeddb://" + model_name;
-          let model = await tf.loadGraphModel(index_path).then(
-            (value: tf.GraphModel) => {
-              return value;
-            },
-            (reason) => {
-              return tf.loadGraphModel(model_path);
-            }
-          );
-          console.log("finished this model" + model_name);
-          return [model_name, model];
-        }
-      )
-    )) as any;
-    this.models_map = new Map(models_entries);
-    await this.complete_process();
-    this.models_map.forEach((model, model_name) => {
-      let index_path = "indexeddb://" + model_name;
-      model.save(index_path);
-    });
-  }
-  async person_graph(person: tf.Tensor) {
-    person = tf.expandDims(person, 0);
-    person = tf.cast(person, "float32");
+
+  async person_graph(person_graph_inputs: NamedTensorMap): Promise<NamedTensorMap> {
+    let person = tf.cast(person_graph_inputs["person"] as tf.Tensor, "float32");
     let person_detection_output = await runModel(
       this.models_map!.get("person_detection")!,
       { person: person },
@@ -98,7 +59,10 @@ export class End_to_End_Tops {
     return Object.assign({}, human_parsing_output, denspose_output);
   }
 
-  async tryon_graph(cloth_graph_outputs: any, person_graph_outputs: any) {
+  async tryon_graph(
+    cloth_graph_outputs: NamedTensorMap,
+    person_graph_outputs: NamedTensorMap
+  ): Promise<NamedTensorMap> {
     let expected_seg_output = await runModel(
       this.models_map!.get("expected_seg")!,
       {
@@ -111,10 +75,6 @@ export class End_to_End_Tops {
       ["expected_seg_mask"],
       true
     );
-    downloadTensorAsImage(
-      convertMaskToColors(expected_seg_output["expected_seg_mask"]),
-      "expected_seg_output.png"
-    );
     let tps_output = await runModel(
       this.models_map!.get("tps")!,
       {
@@ -125,7 +85,6 @@ export class End_to_End_Tops {
       ["warped_cloth", "warped_cloth_mask"],
       true
     );
-    downloadTensorAsImage(tps_output["warped_cloth"], "warped_cloth.png");
     let cloth_inpainting_output = await runModel(
       this.models_map!.get("cloth_inpainting")!,
       {
@@ -148,44 +107,6 @@ export class End_to_End_Tops {
       ["person"],
       true
     );
-    downloadTensorAsImage(
-      skin_inpainting_output["person"],
-      "skin_inpainting_output.png"
-    );
-  }
-
-  async complete_process() {
-    let cloth_graph_outputs = {
-      cloth_mask: tf.ones([1, 256, 192, 1]),
-      cloth: tf.ones([1, 256, 192, 3]),
-    };
-    let person = tf.ones([256, 192, 3]);
-    let person_graph_outputs = await this.person_graph(person);
-    await this.tryon_graph(cloth_graph_outputs, person_graph_outputs);
-  }
-
-  async handle_person_upload(files: [any]) {
-    let person_tensor = await handle_image_load(files);
-    let cloth_tensor = await convertImageUrlToTensor(
-      "https://storage.googleapis.com/uplara_tfjs/cloth_images/a/cloth_raw.png"
-    );
-    cloth_tensor = tf.expandDims(cloth_tensor, 0);
-    cloth_tensor = tf.cast(cloth_tensor, "float32");
-    let cloth_mask_tensor = await convertMaskUrlToTensor(
-      "https://storage.googleapis.com/uplara_tfjs/cloth_images/a/cloth_mask_raw.png"
-    );
-    cloth_mask_tensor = tf.expandDims(cloth_mask_tensor);
-    cloth_mask_tensor = tf.div(cloth_mask_tensor, 51);
-    cloth_mask_tensor = tf.cast(cloth_mask_tensor, "float32");
-    let cloth_graph_outputs = {
-      cloth_mask: cloth_mask_tensor,
-      cloth: cloth_tensor,
-    };
-    cloth_mask_tensor = tf.expandDims(cloth_mask_tensor, 0);
-    let person_graph_outputs = await this.person_graph(person_tensor);
-    let tryon_outputs = this.tryon_graph(
-      cloth_graph_outputs,
-      person_graph_outputs
-    );
+    return skin_inpainting_output;
   }
 }

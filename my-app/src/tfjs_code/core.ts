@@ -1,18 +1,21 @@
 import * as tf from "@tensorflow/tfjs";
+
+
+
 /**
- * Tensor references are way more efficent because they don't come back from the gpu to the cpu. 
+ * Tensor references are way more efficent because they don't come back from the gpu to the cpu.
  * So, when you stitch graphs together, everything just happens on gpu. You would set returnTensorReferences
- * for debugging.  
+ * for debugging.
  * Additionally, if there is only 1 output tensor, tfjs returns it instead of an array of length.
- * 
+ *
  * One weird thing is tfjs adds a :0 to all input nodes so this code autodoes to input nodes.
  * Tensor outputnames we have to specify for each model. Rohan couldn't figure out a way to get the output names
  * of the names to match the python names. Thus, this overwrites the names. The outputs of the names correspond
  * to the order in model.json file. Sometimes in the model json file you have will have an output labeled output2(a)
  * and another followed by output1(b). Follow the order in the file and not the numbers so output names would be (a,b)
- * and not in file.  
- * We also use object map isntead a proper map because this is what tfjs api accepts. 
- * 
+ * and not in file.
+ * We also use object map isntead a proper map because this is what tfjs api accepts.
+ *
  */
 export async function runModel(
   model: tf.GraphModel,
@@ -55,9 +58,7 @@ export function constructMap(names: string[], arrayValues: any) {
   }
   return output_dict;
 }
-export async function drawToCanvas() {
-  
-}
+export async function drawToCanvas() {}
 /**
  * Assumes tensor is [batch, height, width, n]
  */
