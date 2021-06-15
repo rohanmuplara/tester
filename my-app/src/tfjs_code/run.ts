@@ -1,6 +1,6 @@
 import * as tf from "@tensorflow/tfjs";
 import {
-  drawPixelsToCanvas,
+  downloadTensorAsImage,
   handle_image_load,
   runModel,
   convertMaskUrlToTensor,
@@ -8,7 +8,7 @@ import {
   convertMaskToColors,
 } from "./core";
 export class End_to_End_Tops {
-  models_dict: Map<string, tf.GraphModel>;
+  models_map: Map<string, tf.GraphModel> | undefined;
 
   constructor() {
     this.initializeModel(this.getModelsPathDict());
@@ -37,35 +37,48 @@ export class End_to_End_Tops {
       "https://storage.googleapis.com/uplara_tfjs/cloth_images/a/cloth_mask_raw.png"
     );
     cloth_mask_tensor = tf.cast(cloth_mask_tensor, "float32");
-    debugger;
-    this.models_dict = await Promise.all(
+    let models_entries = (await Promise.all(
       Object.entries(models_paths_dict).map(
-        async ([model_name, model_path]) => [
-          model_name,
-          await tf.loadGraphModel(model_path),
-        ]
+        async ([model_name, model_path]) => {
+          let index_path = "indexeddb://" + model_name;
+          let model = await tf.loadGraphModel(index_path).then(
+            (value: tf.GraphModel) => {
+              return value;
+            },
+            (reason) => {
+              return tf.loadGraphModel(model_path);
+            }
+          );
+          console.log("finished this model" + model_name);
+          return [model_name, model];
+        }
       )
-    ).then(Object.fromEntries);
-    this.complete_process();
-    
+    )) as any;
+    this.models_map = new Map(models_entries);
+    await this.complete_process();
+    this.models_map.forEach((model, model_name) => {
+      let index_path = "indexeddb://" + model_name;
+      model.save(index_path);
+    });
   }
   async person_graph(person: tf.Tensor) {
     person = tf.expandDims(person, 0);
     person = tf.cast(person, "float32");
+    debugger;
     let person_detection_output = await runModel(
-      this.models_dict.get("person_detection")!,
+      this.models_map!.get("person_detection")!,
       { person: person },
       ["person"],
       true
     );
     let denspose_output = await runModel(
-      this.models_dict.get("denspose")!,
+      this.models_map!.get("denspose")!,
       { person: person_detection_output["person"] },
       ["denspose_mask"],
       true
     );
     let human_binary_mask_output = await runModel(
-      this.models_dict.get("human_binary_mask")!,
+      this.models_map!.get("human_binary_mask")!,
       {
         person: person_detection_output["person"],
         denspose_mask: denspose_output["denspose_mask"],
@@ -74,7 +87,7 @@ export class End_to_End_Tops {
       true
     );
     let human_parsing_output = await runModel(
-      this.models_dict.get("human_parsing")!,
+      this.models_map!.get("human_parsing")!,
       {
         person: person_detection_output["person"],
         denspose_mask: denspose_output["denspose_mask"],
@@ -88,7 +101,7 @@ export class End_to_End_Tops {
 
   async tryon_graph(cloth_graph_outputs: any, person_graph_outputs: any) {
     let expected_seg_output = await runModel(
-      this.models_dict.get("expected_seg")!,
+      this.models_map!.get("expected_seg")!,
       {
         person: person_graph_outputs["person"],
         cloth: cloth_graph_outputs["cloth"],
@@ -99,12 +112,12 @@ export class End_to_End_Tops {
       ["expected_seg_mask"],
       true
     );
-    drawPixelsToCanvas(
+    downloadTensorAsImage(
       convertMaskToColors(expected_seg_output["expected_seg_mask"]),
       "expected_seg_output.png"
     );
     let tps_output = await runModel(
-      this.models_dict.get("tps")!,
+      this.models_map!.get("tps")!,
       {
         expected_seg_mask: expected_seg_output["expected_seg_mask"],
         cloth: cloth_graph_outputs["cloth"],
@@ -113,9 +126,9 @@ export class End_to_End_Tops {
       ["warped_cloth", "warped_cloth_mask"],
       true
     );
-    drawPixelsToCanvas(tps_output["warped_cloth"], "warped_cloth.png");
+    downloadTensorAsImage(tps_output["warped_cloth"], "warped_cloth.png");
     let cloth_inpainting_output = await runModel(
-      this.models_dict.get("cloth_inpainting")!,
+      this.models_map!.get("cloth_inpainting")!,
       {
         warped_cloth: tps_output["warped_cloth"],
         warped_cloth_mask: tps_output["warped_cloth_mask"],
@@ -126,7 +139,7 @@ export class End_to_End_Tops {
       true
     );
     let skin_inpainting_output = await runModel(
-      this.models_dict.get("skin_inpainting")!,
+      this.models_map!.get("skin_inpainting")!,
       {
         person: person_graph_outputs["person"],
         human_parsing_mask: person_graph_outputs["human_parsing_mask"],
@@ -136,7 +149,7 @@ export class End_to_End_Tops {
       ["person"],
       true
     );
-    drawPixelsToCanvas(
+    downloadTensorAsImage(
       skin_inpainting_output["person"],
       "skin_inpainting_output.png"
     );
@@ -177,5 +190,3 @@ export class End_to_End_Tops {
     );
   }
 }
-
-

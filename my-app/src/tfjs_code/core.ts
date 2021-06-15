@@ -1,5 +1,19 @@
 import * as tf from "@tensorflow/tfjs";
-
+/**
+ * Tensor references are way more efficent because they don't come back from the gpu to the cpu. 
+ * So, when you stitch graphs together, everything just happens on gpu. You would set returnTensorReferences
+ * for debugging.  
+ * Additionally, if there is only 1 output tensor, tfjs returns it instead of an array of length.
+ * 
+ * One weird thing is tfjs adds a :0 to all input nodes so this code autodoes to input nodes.
+ * Tensor outputnames we have to specify for each model. Rohan couldn't figure out a way to get the output names
+ * of the names to match the python names. Thus, this overwrites the names. The outputs of the names correspond
+ * to the order in model.json file. Sometimes in the model json file you have will have an output labeled output2(a)
+ * and another followed by output1(b). Follow the order in the file and not the numbers so output names would be (a,b)
+ * and not in file.  
+ * We also use object map isntead a proper map because this is what tfjs api accepts. 
+ * 
+ */
 export async function runModel(
   model: tf.GraphModel,
   tensorMap: any,
@@ -41,8 +55,13 @@ export function constructMap(names: string[], arrayValues: any) {
   }
   return output_dict;
 }
-
-export async function drawPixelsToCanvas(tensor: tf.Tensor, name: string) {
+export async function drawToCanvas() {
+  
+}
+/**
+ * Assumes tensor is [batch, height, width, n]
+ */
+export async function downloadTensorAsImage(tensor: tf.Tensor, name: string) {
   const canvas = document.createElement("canvas");
   canvas.width = tensor.shape[0];
   canvas.height = tensor.shape[1]!;
@@ -57,7 +76,7 @@ export async function drawPixelsToCanvas(tensor: tf.Tensor, name: string) {
 /*
 This takes a raw mask and gives it colors. This is noninituive and little hacking of the api. The params is actually the color array and the mask is indicies
 as each mask has a class(integer) that corresponds to the collars array. The batch size,width,height is from mask
-and the depth is from the colors array.
+and the depth is from the colors array. Assumes a batch, height, width, 1.
 */
 
 export function convertMaskToColors(mask: tf.Tensor) {
@@ -115,7 +134,6 @@ export async function convertImageUrlToTensor(image_url: string) {
 }
 
 export async function handle_image_load(files: [any]) {
-  console.log("in handle image load");
   let image = new Image();
   let fr = new FileReader();
 
@@ -124,10 +142,8 @@ export async function handle_image_load(files: [any]) {
   };
   let image_promise = onload2promise(image);
   fr.readAsDataURL(files[0]);
-  console.log("awaiting image promise");
   await image_promise;
   let result = tf.browser.fromPixels(image, 3);
-
   return result;
 }
 
