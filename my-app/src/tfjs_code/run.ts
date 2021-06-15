@@ -64,7 +64,6 @@ export class End_to_End_Tops {
   async person_graph(person: tf.Tensor) {
     person = tf.expandDims(person, 0);
     person = tf.cast(person, "float32");
-    debugger;
     let person_detection_output = await runModel(
       this.models_map!.get("person_detection")!,
       { person: person },
