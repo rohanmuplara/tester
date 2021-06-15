@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import "./App.css";
-import { End_to_End_Tops } from "./run";
+import { End_to_End_Tops } from "./tfjs_code/run";
 
 function App() {
   const refContainer = useRef<End_to_End_Tops>();
