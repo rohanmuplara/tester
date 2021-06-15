@@ -15,9 +15,10 @@ function App() {
   const onDrop = useCallback(async (acceptedFiles) => {
     console.log("the accepted files are" + acceptedFiles);
     let cloth_path =
-      "https://storage.googleapis.com/uplara_tfjs/cloth_images/a/cloth_mask_raw.png";
-    let cloth_mask_path =
       "https://storage.googleapis.com/uplara_tfjs/cloth_images/a/cloth_raw.png";
+    let cloth_mask_path =
+      "https://storage.googleapis.com/uplara_tfjs/cloth_images/a/cloth_mask_raw.png";
+
     let person_image = await convert_file_to_img(acceptedFiles[0]);
     let person_tensor = tf.browser.fromPixels(person_image, 3);
     refContainer.current!.runModel(

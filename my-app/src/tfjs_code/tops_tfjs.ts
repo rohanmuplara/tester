@@ -1,7 +1,7 @@
 import * as tf from "@tensorflow/tfjs";
 import { NamedTensorMap } from "@tensorflow/tfjs";
 import { BaseTfjs, NamedModelPathMap } from "./base_tfjs";
-import { runModel } from "./core";
+import { downloadTensorAsImage, runModel } from "./core";
 export class Tops_Tfjs extends BaseTfjs {
   getModelsPathDict(): NamedModelPathMap {
     return {
@@ -22,7 +22,7 @@ export class Tops_Tfjs extends BaseTfjs {
         "https://storage.googleapis.com/uplara_tfjs/newest_rohan/skin_inpainting_graph2/model.json",
     };
   }
-
+  
   async person_graph(
     person_graph_inputs: NamedTensorMap
   ): Promise<NamedTensorMap> {
@@ -48,7 +48,6 @@ export class Tops_Tfjs extends BaseTfjs {
       ["human_binary_mask"],
       true
     );
-    debugger;
     let human_parsing_output = await runModel(
       this.models_map!.get("human_parsing")!,
       {
@@ -110,6 +109,7 @@ export class Tops_Tfjs extends BaseTfjs {
       ["person"],
       true
     );
+    downloadTensorAsImage(skin_inpainting_output["person"], "fucker");
     return skin_inpainting_output;
   }
 }

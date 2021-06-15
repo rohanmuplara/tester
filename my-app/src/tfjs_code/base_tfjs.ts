@@ -15,6 +15,8 @@ export abstract class BaseTfjs {
 
   models_present_indexdb_set: Set<string>;
 
+  models_ready: boolean;
+
   abstract getModelsPathDict(): NamedModelPathMap;
 
   // dummy  abstract because can't declare abstract async methods
@@ -44,6 +46,7 @@ export abstract class BaseTfjs {
 
   constructor() {
     this.models_present_indexdb_set = new Set<string>();
+    this.models_ready = false;
     this.initializeProcess();
   }
 
@@ -76,8 +79,8 @@ export abstract class BaseTfjs {
         }
       )
     )) as any;
-    debugger;
     this.models_map = new Map(models_entries);
+    this.models_ready = true;
   }
   download_models_to_index_db() {
     this.models_map!.forEach((model, model_name) => {
@@ -121,6 +124,7 @@ export abstract class BaseTfjs {
     let person_inputs = {
       person: person,
     };
+    await this.ensureChecks();
     let person_graph_outputs = await this.person_graph(person_inputs);
     let tryon_outputs = this.tryon_graph(
       cloth_graph_outputs,
@@ -128,11 +132,18 @@ export abstract class BaseTfjs {
     );
     return tryon_outputs;
   }
-  async unloadModelFromGpu() {
+  unloadModelFromGpu(): void {
     if (this.models_map) {
       this.models_map.forEach((model: tf.GraphModel, _) => {
         model.dispose();
       });
     }
+  }
+
+  async ensureChecks(): Promise<void> {
+    while (!this.models_ready) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+    return;
   }
 }
