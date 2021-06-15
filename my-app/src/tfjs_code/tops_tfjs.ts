@@ -23,7 +23,9 @@ export class Tops_Tfjs extends BaseTfjs {
     };
   }
 
-  async person_graph(person_graph_inputs: NamedTensorMap): Promise<NamedTensorMap> {
+  async person_graph(
+    person_graph_inputs: NamedTensorMap
+  ): Promise<NamedTensorMap> {
     let person = tf.cast(person_graph_inputs["person"] as tf.Tensor, "float32");
     let person_detection_output = await runModel(
       this.models_map!.get("person_detection")!,
@@ -46,6 +48,7 @@ export class Tops_Tfjs extends BaseTfjs {
       ["human_binary_mask"],
       true
     );
+    debugger;
     let human_parsing_output = await runModel(
       this.models_map!.get("human_parsing")!,
       {

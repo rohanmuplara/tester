@@ -65,7 +65,7 @@ export abstract class BaseTfjs {
           let index_path = "indexeddb://" + model_name;
           let model = await tf.loadGraphModel(index_path).then(
             (value: tf.GraphModel) => {
-              this.models_present_indexdb_set.add(model_name);
+              //this.models_present_indexdb_set.add(model_name);
               return value;
             },
             (_) => {
@@ -76,6 +76,7 @@ export abstract class BaseTfjs {
         }
       )
     )) as any;
+    debugger;
     this.models_map = new Map(models_entries);
   }
   download_models_to_index_db() {
@@ -126,5 +127,12 @@ export abstract class BaseTfjs {
       person_graph_outputs
     );
     return tryon_outputs;
+  }
+  async unloadModelFromGpu() {
+    if (this.models_map) {
+      this.models_map.forEach((model: tf.GraphModel, _) => {
+        model.dispose();
+      });
+    }
   }
 }
