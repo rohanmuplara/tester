@@ -102,7 +102,14 @@ export abstract class BaseTfjs {
     let cloth_graph_outputs = this.get_cloth_graph_dummy_outputs();
     let person_input = this.get_person_input_dummy();
     let person_graph_outputs = await this.person_graph(person_input);
-    this.tryon_graph(cloth_graph_outputs, person_graph_outputs);
+    tf.dispose(person_input);
+    let tryon_graphs = await this.tryon_graph(
+      cloth_graph_outputs,
+      person_graph_outputs
+    );
+    tf.dispose(cloth_graph_outputs);
+    tf.dispose(person_graph_outputs);
+    tf.dispose(tryon_graphs);
   }
   async runModel(
     cloth_path: string,

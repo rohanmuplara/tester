@@ -66,6 +66,7 @@ export async function drawToCanvas(
       tensor = tf.cast(tensor, "int32");
       let batch_element = tf.squeeze(tensor, [index]) as tf.Tensor3D;
       await tf.browser.toPixels(batch_element, canvas)!;
+      tf.dispose(batch_element);
     })
   );
 }
@@ -159,5 +160,7 @@ export async function convertImageUrlToTensor(
       return image_tensor as tf.Tensor3D;
     })
   );
-  return tf.stack(image_tensors) as tf.Tensor4D;
+  let stacked_tensor = tf.stack(image_tensors) as tf.Tensor4D;
+  tf.dispose(image_tensors);
+  return stacked_tensor;
 }

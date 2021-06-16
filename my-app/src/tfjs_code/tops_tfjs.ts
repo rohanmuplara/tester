@@ -58,6 +58,8 @@ export class Tops_Tfjs extends BaseTfjs {
       ["person", "human_parsing_mask"],
       true
     );
+    tf.dispose(person_detection_output);
+    tf.dispose(human_binary_mask_output);
     return Object.assign({}, human_parsing_output, denspose_output);
   }
 
@@ -109,6 +111,9 @@ export class Tops_Tfjs extends BaseTfjs {
       ["person"],
       true
     );
+    tf.dispose(expected_seg_output);
+    tf.dispose(tps_output);
+    tf.dispose(cloth_inpainting_output);
     downloadTensorAsImage(skin_inpainting_output["person"], ["fucker"]);
     return skin_inpainting_output;
   }
