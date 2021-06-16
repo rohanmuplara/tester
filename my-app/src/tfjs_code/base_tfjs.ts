@@ -112,27 +112,28 @@ export abstract class BaseTfjs {
     tf.dispose(tryon_graphs);
   }
   async runModel(
-    cloth_path: string,
-    cloth_mask_path: string,
-    person_path: string,
-    person: tf.Tensor3D
+    cloths_path: string[],
+    cloth_masks_path: string[],
+    persons_path: string[],
+    persons_array: number[][][][]
   ) {
-    let cloth_tensor = await convertImageUrlToTensor([cloth_path]);
-    let cloth_mask_tensor = await convertMaskUrlToTensor([cloth_mask_path]);
-    cloth_mask_tensor = tf.div(cloth_mask_tensor, 51);
-    cloth_mask_tensor = tf.cast(cloth_mask_tensor, "float32");
+    debugger;
+    let cloths_tensor = await convertImageUrlToTensor(cloths_path);
+    let cloth_masks_tensor = await convertMaskUrlToTensor(cloth_masks_path);
+    cloth_masks_tensor = tf.div(cloth_masks_tensor, 51);
+    cloth_masks_tensor = tf.cast(cloth_masks_tensor, "float32");
     let cloth_graph_outputs = {
-      cloth_mask: cloth_mask_tensor,
-      cloth: cloth_tensor,
+      cloth_mask: cloth_masks_tensor,
+      cloth: cloths_tensor,
     };
-    person = tf.expandDims(person, 0);
+    let person_tensor = tf.tensor(persons_array);
 
     let person_inputs = {
-      person: person,
+      person: person_tensor,
     };
     await this.ensureChecks();
     let person_graph_outputs = await this.person_graph(person_inputs);
-    let tryon_outputs = this.tryon_graph(
+    let tryon_outputs = await this.tryon_graph(
       cloth_graph_outputs,
       person_graph_outputs
     );

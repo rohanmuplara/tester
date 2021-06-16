@@ -138,7 +138,7 @@ export function convertMaskToColors(mask: tf.Tensor4D): tf.Tensor4D {
 }
 
 export async function convertMaskUrlToTensor(
-  mask_urls: [string]
+  mask_urls: string[]
 ): Promise<tf.Tensor4D> {
   let mask_tensors = await Promise.all(
     mask_urls.map(async (mask_url) => {
@@ -155,7 +155,7 @@ export async function convertMaskUrlToTensor(
 }
 
 export async function convertImageUrlToTensor(
-  image_urls: [string]
+  image_urls: string[]
 ): Promise<tf.Tensor4D> {
   let image_tensors = await Promise.all(
     image_urls.map(async (image_url) => {

@@ -15,18 +15,19 @@ function App() {
 
   const onDrop = useCallback(async (acceptedFiles) => {
     console.log("the accepted files are" + acceptedFiles);
-    let cloth_path =
-      "https://storage.googleapis.com/uplara_tfjs/cloth_images/a/cloth_raw.png";
-    let cloth_mask_path =
-      "https://storage.googleapis.com/uplara_tfjs/cloth_images/a/cloth_mask_raw.png";
+    let cloths_path = [
+      "https://storage.googleapis.com/uplara_tfjs/cloth_images/a/cloth_raw.png",
+    ];
+    let cloth_masks_path = [
+      "https://storage.googleapis.com/uplara_tfjs/cloth_images/a/cloth_mask_raw.png",
+    ];
 
     let person_images = await convert_files_to_img(acceptedFiles);
-    let person_tensor = tf.browser.fromPixels(person_images[0], 3);
     refContainer.current!.runModel(
-      cloth_path,
-      cloth_mask_path,
-      "dummy_person",
-      person_tensor
+      cloths_path,
+      cloth_masks_path,
+      ["dummy_person"],
+      person_images
     );
   }, []);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });

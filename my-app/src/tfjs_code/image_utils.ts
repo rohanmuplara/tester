@@ -1,3 +1,5 @@
+import * as tf from "@tensorflow/tfjs";
+
 export async function downloadImages(
   image_urls: string[]
 ): Promise<HTMLImageElement[]> {
@@ -15,7 +17,7 @@ export async function downloadImages(
 
 export async function convert_files_to_img(
   files: File[]
-): Promise<HTMLImageElement[]> {
+): Promise<number[][][][]> {
   return await Promise.all(
     files.map(async (file) => {
       let image = new Image();
@@ -26,7 +28,10 @@ export async function convert_files_to_img(
       let image_promise = onload2promise(image);
       fr.readAsDataURL(file);
       await image_promise;
-      return image_promise;
+      let image_tensor = tf.browser.fromPixels(image, 3);
+      let synced_array = image_tensor.arraySync();
+      tf.dispose(image_tensor);
+      return synced_array;
     })
   );
 }

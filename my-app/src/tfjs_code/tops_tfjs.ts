@@ -79,6 +79,7 @@ export class Tops_Tfjs extends BaseTfjs {
       ["expected_seg_mask"],
       true
     );
+
     let tps_output = await runModel(
       this.models_map!.get("tps")!,
       {
