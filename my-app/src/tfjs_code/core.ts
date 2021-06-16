@@ -63,6 +63,7 @@ export async function drawToCanvas(
 ) {
   await Promise.all(
     canvases.map(async (canvas, index) => {
+      tensor = tf.cast(tensor, "int32");
       let batch_element = tf.squeeze(tensor, [index]) as tf.Tensor3D;
       await tf.browser.toPixels(batch_element, canvas)!;
     })
@@ -141,7 +142,7 @@ export async function convertMaskUrlToTensor(
   let mask_tensors = await Promise.all(
     mask_urls.map(async (mask_url) => {
       let mask = await (await downloadImages([mask_url]))[0];
-      let mask_tensor = tf.browser.fromPixels(mask, 3);
+      let mask_tensor = tf.browser.fromPixels(mask, 1);
       return mask_tensor;
     })
   );

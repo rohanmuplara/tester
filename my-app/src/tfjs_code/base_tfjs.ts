@@ -110,9 +110,9 @@ export abstract class BaseTfjs {
     person_path: string,
     person: tf.Tensor3D
   ) {
-    let cloth_tensor = await convertImageUrlToTensor(cloth_path);
+    let cloth_tensor = await convertImageUrlToTensor([cloth_path]);
     cloth_tensor = tf.cast(cloth_tensor, "float32");
-    let cloth_mask_tensor = await convertMaskUrlToTensor(cloth_mask_path);
+    let cloth_mask_tensor = await convertMaskUrlToTensor([cloth_mask_path]);
     cloth_mask_tensor = tf.div(cloth_mask_tensor, 51);
     cloth_mask_tensor = tf.cast(cloth_mask_tensor, "float32");
     let cloth_graph_outputs = {
