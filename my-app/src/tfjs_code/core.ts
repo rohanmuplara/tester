@@ -86,7 +86,7 @@ export async function downloadTensorAsImage(
     return canvas;
   });
   await drawToCanvas(tensor, canvases);
-  names.map((name, index) => {
+  names.forEach((name, index) => {
     let canvas = canvases[index];
     let fake_link = document.createElement("a");
     fake_link.download = name;
