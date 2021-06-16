@@ -1,5 +1,5 @@
 import * as tf from "@tensorflow/tfjs";
-import { downloadImage } from "./image_utils";
+import { downloadImages } from "./image_utils";
 
 /**
  * Tensor references are way more efficent because they don't come back from the gpu to the cpu.
@@ -57,21 +57,40 @@ export function constructMap(names: string[], arrayValues: any) {
   }
   return output_dict;
 }
-export async function drawToCanvas() {}
+export async function drawToCanvas(
+  tensor: tf.Tensor4D,
+  canvases: HTMLCanvasElement[]
+) {
+  await Promise.all(
+    canvases.map(async (canvas, index) => {
+      let batch_element = tf.squeeze(tensor, [index]) as tf.Tensor3D;
+      await tf.browser.toPixels(batch_element, canvas)!;
+    })
+  );
+}
 /**
  * Assumes tensor is [batch, height, width, n]
  */
-export async function downloadTensorAsImage(tensor: tf.Tensor, name: string) {
-  const canvas = document.createElement("canvas");
-  canvas.width = tensor.shape[0];
-  canvas.height = tensor.shape[1]!;
-  let squeezed_tensor: tf.Tensor3D = tf.squeeze(tensor, [0]);
-  let squeezed_int_tensor = tf.cast(squeezed_tensor, "int32");
-  await tf.browser.toPixels(squeezed_int_tensor, canvas)!;
-  let fake_link = document.createElement("a");
-  fake_link.download = name;
-  fake_link.href = canvas.toDataURL();
-  fake_link.click();
+export async function downloadTensorAsImage(
+  tensor: tf.Tensor4D,
+  names: [string]
+) {
+  let canvas_height = tensor.shape[1];
+  let canvas_width = tensor.shape[2];
+  const canvases = names.map(() => {
+    let canvas = document.createElement("canvas");
+    canvas.height = canvas_height;
+    canvas.width = canvas_width;
+    return canvas;
+  });
+  await drawToCanvas(tensor, canvases);
+  names.map((name, index) => {
+    let canvas = canvases[index];
+    let fake_link = document.createElement("a");
+    fake_link.download = name;
+    fake_link.href = canvas.toDataURL();
+    fake_link.click();
+  });
 }
 /*
 This takes a raw mask and gives it colors. This is noninituive and little hacking of the api. The params is actually the color array and the mask is indicies
@@ -79,49 +98,65 @@ as each mask has a class(integer) that corresponds to the collars array. The bat
 and the depth is from the colors array. Assumes a batch, height, width, 1.
 */
 
-export function convertMaskToColors(mask: tf.Tensor) {
-  let colors = tf.tensor([
-    [0, 0, 0],
-    [255, 0, 0],
-    [32, 173, 10],
-    [117, 112, 2],
-    [136, 10, 117],
-    [34, 16, 169],
-    [36, 121, 142],
-    [248, 109, 67],
-    [242, 124, 242],
-    [208, 97, 48],
-    [49, 220, 181],
-    [216, 210, 239],
-    [27, 50, 31],
-    [206, 173, 55],
-    [127, 98, 97],
-    [255, 229, 85],
-    [234, 123, 143],
-    [122, 52, 124],
-    [242, 68, 46],
-    [68, 34, 91],
-    [34, 236, 26],
-    [236, 26, 84],
-    [94, 0, 96],
-    [63, 35, 198],
-    [110, 103, 165],
-    [105, 245, 12],
-  ]);
-  colors = tf.cast(colors, "int32");
-  mask = tf.cast(mask, "int32");
-  let spliced_mask = tf.squeeze(mask, [-1]);
-  return tf.gather(colors, spliced_mask);
+export function convertMaskToColors(mask: tf.Tensor4D): tf.Tensor4D {
+  return tf.tidy(() => {
+    let colors = tf.tensor([
+      [0, 0, 0],
+      [255, 0, 0],
+      [32, 173, 10],
+      [117, 112, 2],
+      [136, 10, 117],
+      [34, 16, 169],
+      [36, 121, 142],
+      [248, 109, 67],
+      [242, 124, 242],
+      [208, 97, 48],
+      [49, 220, 181],
+      [216, 210, 239],
+      [27, 50, 31],
+      [206, 173, 55],
+      [127, 98, 97],
+      [255, 229, 85],
+      [234, 123, 143],
+      [122, 52, 124],
+      [242, 68, 46],
+      [68, 34, 91],
+      [34, 236, 26],
+      [236, 26, 84],
+      [94, 0, 96],
+      [63, 35, 198],
+      [110, 103, 165],
+      [105, 245, 12],
+    ]);
+    colors = tf.cast(colors, "int32");
+    mask = tf.cast(mask, "int32");
+    let spliced_mask = tf.squeeze(mask, [-1]);
+    return tf.gather(colors, spliced_mask) as tf.Tensor4D;
+  });
 }
 
-export async function convertMaskUrlToTensor(mask_url: string) {
-  let mask_image = await downloadImage(mask_url);
-  let mask_tensor = tf.browser.fromPixels(mask_image, 1);
-  return tf.expandDims(mask_tensor, 0);
+export async function convertMaskUrlToTensor(
+  mask_urls: [string]
+): Promise<tf.Tensor4D> {
+  let mask_tensors = await Promise.all(
+    mask_urls.map(async (mask_url) => {
+      let mask = await (await downloadImages([mask_url]))[0];
+      let mask_tensor = tf.browser.fromPixels(mask, 3);
+      return mask_tensor;
+    })
+  );
+  return tf.stack(mask_tensors) as tf.Tensor4D;
 }
 
-export async function convertImageUrlToTensor(image_url: string) {
-  let image = await downloadImage(image_url);
-  let image_tensor = tf.browser.fromPixels(image, 3);
-  return tf.expandDims(image_tensor, 0);
+export async function convertImageUrlToTensor(
+  image_urls: [string]
+): Promise<tf.Tensor4D> {
+  let image_tensors = await Promise.all(
+    image_urls.map(async (image_url) => {
+      let image = (await downloadImages([image_url]))[0];
+      let image_tensor = tf.browser.fromPixels(image, 3);
+      return image_tensor as tf.Tensor3D;
+    })
+  );
+  return tf.stack(image_tensors) as tf.Tensor4D;
 }

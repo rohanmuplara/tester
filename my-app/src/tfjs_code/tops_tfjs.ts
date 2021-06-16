@@ -22,7 +22,7 @@ export class Tops_Tfjs extends BaseTfjs {
         "https://storage.googleapis.com/uplara_tfjs/newest_rohan/skin_inpainting_graph2/model.json",
     };
   }
-  
+
   async person_graph(
     person_graph_inputs: NamedTensorMap
   ): Promise<NamedTensorMap> {
@@ -109,7 +109,7 @@ export class Tops_Tfjs extends BaseTfjs {
       ["person"],
       true
     );
-    downloadTensorAsImage(skin_inpainting_output["person"], "fucker");
+    downloadTensorAsImage(skin_inpainting_output["person"], ["fucker"]);
     return skin_inpainting_output;
   }
 }

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import "./App.css";
-import { convert_file_to_img } from "./tfjs_code/image_utils";
+import { convert_files_to_img } from "./tfjs_code/image_utils";
 import { Tops_Tfjs } from "./tfjs_code/tops_tfjs";
 import * as tf from "@tensorflow/tfjs";
 
@@ -20,8 +20,8 @@ function App() {
     let cloth_mask_path =
       "https://storage.googleapis.com/uplara_tfjs/cloth_images/a/cloth_mask_raw.png";
 
-    let person_image = await convert_file_to_img(acceptedFiles[0]);
-    let person_tensor = tf.browser.fromPixels(person_image, 3);
+    let person_images = await convert_files_to_img(acceptedFiles);
+    let person_tensor = tf.browser.fromPixels(person_images[0], 3);
     refContainer.current!.runModel(
       cloth_path,
       cloth_mask_path,
