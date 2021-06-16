@@ -142,12 +142,16 @@ export async function convertMaskUrlToTensor(
 ): Promise<tf.Tensor4D> {
   let mask_tensors = await Promise.all(
     mask_urls.map(async (mask_url) => {
-      let mask = await (await downloadImages([mask_url]))[0];
+      let mask = (await downloadImages([mask_url]))[0];
       let mask_tensor = tf.browser.fromPixels(mask, 1);
-      return mask_tensor;
+      let mask_float_tensor = tf.cast(mask_tensor, "float32");
+      tf.dispose(mask_tensor);
+      return mask_float_tensor;
     })
   );
-  return tf.stack(mask_tensors) as tf.Tensor4D;
+  let stacked_tensor = tf.stack(mask_tensors) as tf.Tensor4D;
+  tf.dispose(mask_tensors);
+  return stacked_tensor;
 }
 
 export async function convertImageUrlToTensor(
@@ -157,7 +161,9 @@ export async function convertImageUrlToTensor(
     image_urls.map(async (image_url) => {
       let image = (await downloadImages([image_url]))[0];
       let image_tensor = tf.browser.fromPixels(image, 3);
-      return image_tensor as tf.Tensor3D;
+      let image_float_tensor = tf.cast(image_tensor, "float32");
+      tf.dispose(image_tensor);
+      return image_float_tensor as tf.Tensor3D;
     })
   );
   let stacked_tensor = tf.stack(image_tensors) as tf.Tensor4D;

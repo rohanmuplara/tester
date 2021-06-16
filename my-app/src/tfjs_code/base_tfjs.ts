@@ -118,7 +118,6 @@ export abstract class BaseTfjs {
     person: tf.Tensor3D
   ) {
     let cloth_tensor = await convertImageUrlToTensor([cloth_path]);
-    cloth_tensor = tf.cast(cloth_tensor, "float32");
     let cloth_mask_tensor = await convertMaskUrlToTensor([cloth_mask_path]);
     cloth_mask_tensor = tf.div(cloth_mask_tensor, 51);
     cloth_mask_tensor = tf.cast(cloth_mask_tensor, "float32");
@@ -137,6 +136,8 @@ export abstract class BaseTfjs {
       cloth_graph_outputs,
       person_graph_outputs
     );
+    tf.dispose(cloth_graph_outputs);
+    tf.dispose(person_graph_outputs);
     return tryon_outputs;
   }
   disposeModelFromGpu(): void {
