@@ -111,6 +111,9 @@ export abstract class BaseTfjs {
     tf.dispose(person_graph_outputs);
     tf.dispose(tryon_graphs);
   }
+
+
+
   async runModel(
     cloths_path: string[],
     cloth_masks_path: string[],
@@ -120,8 +123,6 @@ export abstract class BaseTfjs {
     debugger;
     let cloths_tensor = await convertImageUrlToTensor(cloths_path);
     let cloth_masks_tensor = await convertMaskUrlToTensor(cloth_masks_path);
-    cloth_masks_tensor = tf.div(cloth_masks_tensor, 51);
-    cloth_masks_tensor = tf.cast(cloth_masks_tensor, "float32");
     let cloth_graph_outputs = {
       cloth_mask: cloth_masks_tensor,
       cloth: cloths_tensor,

@@ -16,10 +16,10 @@ function App() {
   const onDrop = useCallback(async (acceptedFiles) => {
     console.log("the accepted files are" + acceptedFiles);
     let cloths_path = [
-      "https://storage.googleapis.com/uplara_tfjs/cloth_images/a/cloth_raw.png",
+      "https://storage.googleapis.com/uplara_tfjs/cloth_images/c/cloth.png",
     ];
     let cloth_masks_path = [
-      "https://storage.googleapis.com/uplara_tfjs/cloth_images/a/cloth_mask_raw.png",
+      "https://storage.googleapis.com/uplara_tfjs/cloth_images/c/cloth_mask.png",
     ];
 
     let person_images = await convert_files_to_img(acceptedFiles);
