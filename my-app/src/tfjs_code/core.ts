@@ -183,7 +183,6 @@ export async function converTensorToDataUrls(
   tensor: tf.Tensor4D
 ): Promise<string[]> {
   let individualTensors = tensor.unstack() as tf.Tensor3D[];
-  let dummyArray = new Array(tensor.shape[0]);
   let height = tensor.shape[1];
   let width = tensor.shape[2];
   return Promise.all(

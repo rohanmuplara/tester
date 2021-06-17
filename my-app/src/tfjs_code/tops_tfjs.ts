@@ -88,7 +88,7 @@ export class Tops_Tfjs extends BaseTfjs {
         cloth_mask: cloth_graph_outputs["cloth_mask"],
       },
       ["warped_cloth", "warped_cloth_mask"],
-      true
+      false
     );
     let cloth_inpainting_output = await runModel(
       this.models_map!.get("cloth_inpainting")!,
