@@ -162,3 +162,41 @@ export async function convertImageUrlToTensor(
   tf.dispose(image_tensors);
   return stacked_tensor;
 }
+
+export async function convertDataUrlsToTensor(
+  dataUrls: string[]
+): Promise<tf.Tensor4D> {
+  let tensorsArray = await Promise.all(
+    dataUrls.map(async (dataUrl) => {
+      let image = new Image();
+      let image_promise = onload2promise(image);
+      image.src = dataUrl;
+      await image_promise;
+      return tf.browser.fromPixels(image, 3);
+    })
+  );
+  let stacked_tensor = tf.stack(tensorsArray) as tf.Tensor4D;
+  return stacked_tensor;
+}
+
+export async function converTensorToDataUrls(
+  tensor: tf.Tensor4D
+): Promise<string[]> {
+  let individualTensors = tensor.unstack() as tf.Tensor3D[];
+  let dummyArray = new Array(tensor.shape[0]);
+  let height = tensor.shape[1];
+  let width = tensor.shape[2];
+  return Promise.all(
+    individualTensors.map(async (individualTensor) => {
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      await tf.browser.toPixels(individualTensor, canvas);
+      return canvas.toDataURL(); // will return the base64 encoding
+    })
+  );
+}
+
+function onload2promise(image: HTMLImageElement) {
+  throw new Error("Function not implemented.");
+}

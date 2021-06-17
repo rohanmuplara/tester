@@ -1,5 +1,3 @@
-import * as tf from "@tensorflow/tfjs";
-
 export async function downloadImages(
   image_urls: string[]
 ): Promise<HTMLImageElement[]> {

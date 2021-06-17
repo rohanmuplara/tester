@@ -25,7 +25,7 @@ function App() {
     refContainer.current!.runModelWithNewPerson(
       cloths_path,
       cloth_masks_path,
-      ["dummy_person"],
+      "dummy_person",
       person_image_data_urls[0]
     );
   }, []);
