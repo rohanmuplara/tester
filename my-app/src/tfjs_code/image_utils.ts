@@ -12,19 +12,22 @@ export async function downloadImages(
     })
   );
 }
+export function isSupportedImageType(fileType: string): boolean {
+  let set = new Set(["image/png", "image/jpeg", "image/heic"]);
+  return set.has(fileType);
+}
 
-export async function convert_files_to_img_data(
-  files: File[]
-): Promise<string[]> {
-  return await Promise.all(
-    files.map(async (file) => {
-      let fileReader = new FileReader();
-      let fileReaderPromise = onload2promise(fileReader);
-      fileReader.readAsDataURL(file);
-      await fileReaderPromise;
-      return fileReader.result as string;
-    })
-  );
+export async function convert_files_to_img_data(file: File): Promise<string> {
+  let fileType = file.type;
+  if (isSupportedImageType(fileType)) {
+    let fileReader = new FileReader();
+    let fileReaderPromise = onload2promise(fileReader);
+    fileReader.readAsDataURL(file);
+    await fileReaderPromise;
+    return fileReader.result as string;
+  } else {
+    return Promise.reject(file.type);
+  }
 }
 
 interface OnLoadAble {

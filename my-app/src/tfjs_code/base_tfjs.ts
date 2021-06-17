@@ -176,6 +176,7 @@ export abstract class BaseTfjs {
       );
       tf.dispose(cloth_graph_output);
       tf.dispose(person_graph_output);
+      
       let tryon_person_data_array = await converTensorToDataUrls(
         tryon_graph_outputs["person"] as tf.Tensor4D
       );
