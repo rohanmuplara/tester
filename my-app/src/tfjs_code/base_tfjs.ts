@@ -135,7 +135,7 @@ export abstract class BaseTfjs {
     tf.dispose(tryon_graph_output);
   }
 
-  async runModelWithNewPerson(
+  async runTryon(
     clothsAndMasksPath: ClothandMaskPath[],
     person_key: string,
     person_data_url?: string
