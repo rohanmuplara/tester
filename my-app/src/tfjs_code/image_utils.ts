@@ -31,7 +31,6 @@ export async function convert_file_to_img_data(file: File): Promise<string> {
     fileReader.readAsDataURL(file);
     await fileReaderPromise;
     let dataUrl = fileReader.result as string;
-    fileReader.result;
     if (fileType === "image/heic") {
       let fetch_result = await fetch(dataUrl);
       let heic_blob = (await fetch_result.blob()) as Blob;
