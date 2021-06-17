@@ -2,7 +2,10 @@ import { useCallback, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import "./App.css";
 import { ClothandMaskPath } from "./tfjs_code/base_tfjs";
-import { convert_file_to_img_data, getKeyNameFromFile } from "./tfjs_code/image_utils";
+import {
+  convert_file_to_img_data,
+  getKeyNameFromFile,
+} from "./tfjs_code/image_utils";
 import { Tops_Tfjs } from "./tfjs_code/tops_tfjs";
 
 function App() {
@@ -22,7 +25,7 @@ function App() {
       (data) => data,
       (error) => console.log(error + "we don't support this file type")
     );
-    let person_key = getKeyNameFromFile(uploadedFiles[0])
+    let person_key = getKeyNameFromFile(uploadedFiles[0]);
     let cloths_path_array = [
       [
         "https://storage.googleapis.com/uplara_tfjs/cloth_images/c/cloth.png",
@@ -34,6 +37,7 @@ function App() {
       person_key,
       person_image_data_url!
     );
+    refContainer.current!.runTryon(cloths_path_array, person_key);
   }, []);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
   return (

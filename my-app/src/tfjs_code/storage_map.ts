@@ -4,10 +4,11 @@ export class Storage_Map {
   constructor(namespace: string) {
     this.namespace = namespace;
     let metaTablePath = namespace + ":metadata";
-    if (localStorage.getItem(metaTablePath) === null) {
+    let metaTableData = localStorage.getItem(metaTablePath);
+    if (metaTableData === null) {
       this.existing_keys = [];
     } else {
-      this.existing_keys = JSON.parse(localStorage.getItem(namespace)!);
+      this.existing_keys = JSON.parse(metaTableData);
     }
   }
   setItem(key: string, value: any): void {
