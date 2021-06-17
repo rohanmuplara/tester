@@ -140,17 +140,22 @@ export abstract class BaseTfjs {
     person_key: string,
     person_data_url?: string
   ): Promise<string[]> {
+    debugger;
     let cloth_path = clothsAndMasksPath[0][0];
     let cloth_mask_path = clothsAndMasksPath[0][1];
     let cloth_key = cloth_path + ":" + cloth_mask_path;
     let tryon_key = cloth_path + ":" + person_key;
-    let tryon_graph_output = this.tryon_graph_output_map.getItem(tryon_key);
+    let tryon_graph_output =
+      await this.tryon_graph_output_map.getNamedTensorMap(tryon_key);
     if (tryon_graph_output !== null) {
-      return await converTensorToDataUrls(tryon_graph_output["person"]);
+      return await converTensorToDataUrls(
+        tryon_graph_output["person"] as tf.Tensor4D
+      );
     } else {
-      await this.ensureChecks();
       let person_graph_output =
         await this.person_graph_output_map.getNamedTensorMap(person_key);
+      await this.ensureChecks();
+
       if (person_graph_output === null) {
         let person_tensor = await convertDataUrlsToTensor([person_data_url!]);
         let person_inputs = {
@@ -183,7 +188,6 @@ export abstract class BaseTfjs {
         cloth_graph_output,
         person_graph_output
       );
-      debugger;
       await this.tryon_graph_output_map.setNameTensorMap(
         tryon_key,
         tryon_graph_output
