@@ -1,3 +1,5 @@
+import heic2any from "heic2any";
+
 export async function downloadImages(
   image_urls: string[]
 ): Promise<HTMLImageElement[]> {
@@ -17,14 +19,27 @@ export function isSupportedImageType(fileType: string): boolean {
   return set.has(fileType);
 }
 
-export async function convert_files_to_img_data(file: File): Promise<string> {
+export function getKeyNameFromFile(file: File): string {
+  return file.name + file.lastModified;
+}
+
+export async function convert_file_to_img_data(file: File): Promise<string> {
   let fileType = file.type;
   if (isSupportedImageType(fileType)) {
     let fileReader = new FileReader();
     let fileReaderPromise = onload2promise(fileReader);
     fileReader.readAsDataURL(file);
     await fileReaderPromise;
-    return fileReader.result as string;
+    let dataUrl = fileReader.result as string;
+    fileReader.result;
+    if (fileType === "image/heic") {
+      let fetch_result = await fetch(dataUrl);
+      let heic_blob = (await fetch_result.blob()) as Blob;
+      let pngBlob = heic2any({ blob: heic_blob, toType: "image/png" });
+      let pngDataUrl = URL.createObjectURL(pngBlob);
+      return pngDataUrl;
+    }
+    return dataUrl;
   } else {
     return Promise.reject(file.type);
   }

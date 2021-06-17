@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import "./App.css";
 import { ClothandMaskPath } from "./tfjs_code/base_tfjs";
-import { convert_files_to_img_data } from "./tfjs_code/image_utils";
+import { convert_file_to_img_data } from "./tfjs_code/image_utils";
 import { Tops_Tfjs } from "./tfjs_code/tops_tfjs";
 
 function App() {
@@ -16,7 +16,7 @@ function App() {
   const onDrop = useCallback(async (acceptedFiles) => {
     console.log("the accepted files are" + acceptedFiles);
 
-    let person_image_data_urls = await convert_files_to_img_data(acceptedFiles);
+    let person_image_data_urls = await convert_file_to_img_data(acceptedFiles);
     let cloths_path_array = [
       [
         "https://storage.googleapis.com/uplara_tfjs/cloth_images/c/cloth.png",
