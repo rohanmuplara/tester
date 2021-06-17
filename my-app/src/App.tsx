@@ -23,7 +23,7 @@ function App() {
     ];
 
     let person_images = await convert_files_to_img(acceptedFiles);
-    refContainer.current!.runModel(
+    refContainer.current!.runModelWithNewPerson(
       cloths_path,
       cloth_masks_path,
       ["dummy_person"],

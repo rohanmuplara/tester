@@ -20,10 +20,18 @@ export class Storage_Map {
   getItem(key: string): any {
     let namespaced_key = this.namespace + ":" + key;
     let json_value = localStorage.getItem(namespaced_key);
-    return JSON.parse(json_value!);
+    if (json_value) {
+      return JSON.parse(json_value!);
+    } else {
+      return null;
+    }
   }
 
   getExistingKeys(): string[] {
     return this.existing_keys;
   }
+
+
+  }
+
 }

@@ -1,6 +1,7 @@
 import * as tf from "@tensorflow/tfjs";
 import { NamedTensorMap } from "@tensorflow/tfjs";
 import { convertMaskUrlToTensor, convertImageUrlToTensor } from "./core";
+import { Storage_Map } from "./storage_map";
 
 // copied naming patterns from tfjs
 export type NamedModelMap = {
@@ -16,6 +17,14 @@ export abstract class BaseTfjs {
   models_present_indexdb_set: Set<string>;
 
   models_ready: boolean;
+
+  cloths_path_map: Storage_Map;
+
+  cloths_mask_path_map: Storage_Map;
+
+  persons_path_map: Storage_Map;
+
+  tryons_path_map: Storage_Map;
 
   abstract getModelsPathDict(): NamedModelPathMap;
 
@@ -47,6 +56,10 @@ export abstract class BaseTfjs {
   constructor() {
     this.models_present_indexdb_set = new Set<string>();
     this.models_ready = false;
+    this.cloths_path_map = new Storage_Map("cloths");
+    this.cloths_mask_path_map = new Storage_Map("cloths_mask");
+    this.persons_path_map = new Storage_Map("person");
+    this.tryons_path_map = new Storage_Map("tryons");
     this.initializeProcess();
   }
 
@@ -112,12 +125,61 @@ export abstract class BaseTfjs {
     tf.dispose(tryon_graphs);
   }
 
-
-
-  async runModel(
+  async runModelWithCachedPerson(
+    cloths_path: string[],
+    cloths_mask_path: string[],
+    persons_key: string[]
+  ): Promise<number[][][][]> {
+    {
+      let cloth_path = cloths_path[0];
+      let cloth_mask_path = cloths_mask_path[0];
+      let person_key = persons_key[0];
+      let tryon_path = cloth_path + ":" + person_key;
+      let tryon_image_data = this.tryons_path_map.getItem(tryon_path);
+      if (tryon_image_data !== null) {
+        return tryon_image_data;
+      } else {
+        let cloths_mask_array =
+          this.cloths_mask_path_map.getItem(cloth_mask_path);
+        let cloths_mask_tensor;
+        if (cloths_mask_array === null) {
+          cloths_mask_tensor = await convertMaskUrlToTensor(cloths_mask_path);
+        } else {
+          cloths_mask_tensor = tf.tensor(cloths_mask_array);
+        }
+        let cloths_array = this.cloths_path_map.getItem(cloth_path);
+        let cloths_tensor;
+        if (cloths_array === null) {
+          cloths_tensor = await convertMaskUrlToTensor(cloths_path);
+        } else {
+          cloths_tensor = tf.tensor(cloths_array);
+        }
+        let cloth_graph_outputs = {
+          cloth_mask: cloths_mask_tensor,
+          cloth: cloths_tensor,
+        };
+        let person_array = this.persons_path_map.getItem(person_key);
+        let person_tensor = tf.tensor(person_array);
+        let person_inputs = {
+          person: person_tensor,
+        };
+        await this.ensureChecks();
+        let person_graph_outputs = await this.person_graph(person_inputs);
+        let tryon_outputs = await this.tryon_graph(
+          cloth_graph_outputs,
+          person_graph_outputs
+        );
+        tf.dispose(cloth_graph_outputs);
+        tf.dispose(person_graph_outputs);
+        let tryon_person_array = await tryon_outputs["person"].array();
+        tf.dispose(tryon_outputs);
+        return tryon_person_array as number[][][][];
+      }
+    }
+  }
+  async runModelWithNewPerson(
     cloths_path: string[],
     cloth_masks_path: string[],
-    persons_path: string[],
     persons_array: number[][][][]
   ) {
     debugger;
@@ -155,5 +217,9 @@ export abstract class BaseTfjs {
       await new Promise((resolve) => setTimeout(resolve, 500));
     }
     return;
+  }
+
+  getPersonImages(): string[] {
+    return this.persons_path_map.getExistingKeys();
   }
 }
