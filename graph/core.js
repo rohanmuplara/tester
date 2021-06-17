@@ -5,7 +5,10 @@ async function runModel(model, tensorMap, tensorOutputNames, returnTensorReferen
       const new_tensor_name = tensor_name + ":0"
       renamedTensorMap[new_tensor_name] = tensorMap[tensor_name]
     }
-    const predictionsTensor =  await model.executeAsync(renamedTensorMap);
+    console.time("a")
+    const predictionsTensor =   model.predict(renamedTensorMap).arraySync();
+    console.timeEnd("a")
+    return predictionsTensor;
     if (returnTensorReferences) {
       return constructMap(tensorOutputNames, predictionsTensor)
     } else {

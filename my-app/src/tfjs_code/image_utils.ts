@@ -15,23 +15,16 @@ export async function downloadImages(
   );
 }
 
-export async function convert_files_to_img(
+export async function convert_files_to_img_data(
   files: File[]
-): Promise<number[][][][]> {
+): Promise<string[]> {
   return await Promise.all(
     files.map(async (file) => {
-      let image = new Image();
-      let fr = new FileReader();
-      fr.onload = function () {
-        image.src = fr.result as string;
-      };
-      let image_promise = onload2promise(image);
-      fr.readAsDataURL(file);
-      await image_promise;
-      let image_tensor = tf.browser.fromPixels(image, 3);
-      let synced_array = image_tensor.arraySync();
-      tf.dispose(image_tensor);
-      return synced_array;
+      let fileReader = new FileReader();
+      let fileReaderPromise = onload2promise(fileReader);
+      fileReader.readAsDataURL(file);
+      await fileReaderPromise;
+      return fileReader.result as string;
     })
   );
 }

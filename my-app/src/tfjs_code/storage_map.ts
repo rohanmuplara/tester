@@ -30,8 +30,4 @@ export class Storage_Map {
   getExistingKeys(): string[] {
     return this.existing_keys;
   }
-
-
-  }
-
 }

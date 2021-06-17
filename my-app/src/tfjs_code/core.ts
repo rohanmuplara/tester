@@ -20,28 +20,20 @@ export async function runModel(
   model: tf.GraphModel,
   tensorMap: any,
   tensorOutputNames: string[],
-  returnTensorReferences: boolean
+  isNonBranching: boolean
 ) {
   let renamedTensorMap: any = {};
   for (const tensor_name in tensorMap) {
     const new_tensor_name = tensor_name + ":0";
     renamedTensorMap[new_tensor_name] = tensorMap[tensor_name];
   }
-  const predictionsTensor = await model.executeAsync(renamedTensorMap);
-  if (returnTensorReferences) {
-    return constructMap(tensorOutputNames, predictionsTensor);
+  let predictionsTensor;
+  if (isNonBranching) {
+    predictionsTensor = model.execute(renamedTensorMap);
   } else {
-    if (Array.isArray(predictionsTensor)) {
-      const promises = predictionsTensor.map((x) => x.array());
-      const arrayTensor = await Promise.all(promises);
-      tf.dispose(predictionsTensor);
-      return constructMap(tensorOutputNames, arrayTensor);
-    } else {
-      const arrayTensor = predictionsTensor.arraySync();
-      tf.dispose(predictionsTensor);
-      return constructMap(tensorOutputNames, arrayTensor);
-    }
+    predictionsTensor = await model.executeAsync(renamedTensorMap);
   }
+  return constructMap(tensorOutputNames, predictionsTensor);
 }
 export function constructMap(names: string[], arrayValues: any) {
   let output_dict: any = {};

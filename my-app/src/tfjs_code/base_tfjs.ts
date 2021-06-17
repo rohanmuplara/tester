@@ -125,15 +125,15 @@ export abstract class BaseTfjs {
     tf.dispose(tryon_graphs);
   }
 
-  async runModelWithCachedPerson(
+  async runModel(
     cloths_path: string[],
     cloths_mask_path: string[],
-    persons_key: string[]
-  ): Promise<number[][][][]> {
+
+    person_data_url: string
+  ): Promise<string[]> {
     {
       let cloth_path = cloths_path[0];
       let cloth_mask_path = cloths_mask_path[0];
-      let person_key = persons_key[0];
       let tryon_path = cloth_path + ":" + person_key;
       let tryon_image_data = this.tryons_path_map.getItem(tryon_path);
       if (tryon_image_data !== null) {

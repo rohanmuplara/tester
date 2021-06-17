@@ -32,13 +32,6 @@ function average(array) {
 }
 
 async function benchmarkInputDefininedInCode() {
-   let  tps_inputs = {"cloth": tf.ones([1,256, 192, 3]), "human_parsing_mask": tf.ones([1,256, 192, 1]), "denspose_mask": tf.ones([1,256, 192, 1]),
-      "cloth_mask": tf.ones([1,256, 192, 1]),  "expected_seg_mask": tf.ones([1,256, 192, 1])}
-   console.log("a");
-   await benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/tps_graph/model.json", tps_inputs, ["warped_cloth", "warped_cloth_mask"], 4)
-   let person_detection_inputs = {"person": tf.ones([1,256,193,3])}
-   console.log("b");
-   await benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/person_detection_graph/model.json", person_detection_inputs,["person"],  4)
    let denspose_inputs = {"person": tf.ones([1,256,192,3])}
    console.log("c");
    await benchmarkInput("https://storage.googleapis.com/uplara_tfjs/newest_rohan/denspose_graph/model.json", denspose_inputs, ["denspose_inputs"], 4)

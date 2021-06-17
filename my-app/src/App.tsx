@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import "./App.css";
-import { convert_files_to_img } from "./tfjs_code/image_utils";
+import { convert_files_to_img_data } from "./tfjs_code/image_utils";
 import { Tops_Tfjs } from "./tfjs_code/tops_tfjs";
-import * as tf from "@tensorflow/tfjs";
 
 function App() {
   const refContainer = useRef<Tops_Tfjs>();
@@ -22,12 +21,12 @@ function App() {
       "https://storage.googleapis.com/uplara_tfjs/cloth_images/c/cloth_mask.png",
     ];
 
-    let person_images = await convert_files_to_img(acceptedFiles);
+    let person_image_data_urls = await convert_files_to_img_data(acceptedFiles);
     refContainer.current!.runModelWithNewPerson(
       cloths_path,
       cloth_masks_path,
       ["dummy_person"],
-      person_images
+      person_image_data_urls[0]
     );
   }, []);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
