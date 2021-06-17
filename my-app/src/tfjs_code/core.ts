@@ -1,5 +1,5 @@
 import * as tf from "@tensorflow/tfjs";
-import { downloadImages } from "./image_utils";
+import { downloadImages, onload2promise } from "./image_utils";
 
 /**
  * Tensor references are way more efficent because they don't come back from the gpu to the cpu.
@@ -182,10 +182,11 @@ export async function convertDataUrlsToTensor(
 export async function converTensorToDataUrls(
   tensor: tf.Tensor4D
 ): Promise<string[]> {
-  let individualTensors = tensor.unstack() as tf.Tensor3D[];
-  let height = tensor.shape[1];
-  let width = tensor.shape[2];
-  return Promise.all(
+  let int32tensor = tf.cast(tensor, "int32");
+  let individualTensors = int32tensor.unstack() as tf.Tensor3D[];
+  let height = int32tensor.shape[1];
+  let width = int32tensor.shape[2];
+  let dataUrls = await Promise.all(
     individualTensors.map(async (individualTensor) => {
       const canvas = document.createElement("canvas");
       canvas.width = width;
@@ -194,8 +195,7 @@ export async function converTensorToDataUrls(
       return canvas.toDataURL(); // will return the base64 encoding
     })
   );
-}
-
-function onload2promise(image: HTMLImageElement) {
-  throw new Error("Function not implemented.");
+  tf.dispose(int32tensor);
+  tf.dispose(individualTensors);
+  return dataUrls;
 }

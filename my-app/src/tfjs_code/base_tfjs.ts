@@ -140,49 +140,47 @@ export abstract class BaseTfjs {
     person_key: string,
     person_data_url?: string
   ): Promise<string[]> {
-    {
-      let cloth_path = clothsAndMasksPath[0][0];
-      let cloth_mask_path = clothsAndMasksPath[0][1];
-      let cloth_key = cloth_path + ":" + cloth_mask_path;
-      let tryon_path = cloth_path + ":" + person_key;
-      let tryon_graph_output = this.tryon_graph_output_map.getItem(tryon_path);
-      if (tryon_graph_output !== null) {
-        return await converTensorToDataUrls(tryon_graph_output["person"]);
-      } else {
-        await this.ensureChecks();
-        let person_graph_output =
-          this.person_graph_output_map.getItem(person_key);
-        if (person_graph_output === null) {
-          let person_tensor = await convertDataUrlsToTensor([person_data_url!]);
-          let person_inputs = {
-            person: person_tensor as tf.Tensor4D,
-          };
-          person_graph_output = await this.person_graph(person_inputs);
-        }
-        let cloth_graph_output = this.cloth_graph_output_map.getItem(cloth_key);
-        if (cloth_graph_output === null) {
-          let cloths_tensor = await convertImageUrlToTensor([cloth_path]);
-          let cloths_mask_tensor = await convertMaskUrlToTensor([
-            cloth_mask_path,
-          ]);
-          cloth_graph_output = {
-            cloth_mask: cloths_mask_tensor,
-            cloth: cloths_tensor,
-          };
-        }
-
-        let tryon_graph_outputs = await this.tryon_graph(
-          cloth_graph_output,
-          person_graph_output
-        );
-        tf.dispose(cloth_graph_output);
-        tf.dispose(person_graph_output);
-        let tryon_person_data_array = await converTensorToDataUrls(
-          tryon_graph_outputs["person"] as tf.Tensor4D
-        );
-        tf.dispose(tryon_graph_outputs);
-        return tryon_person_data_array;
+    let cloth_path = clothsAndMasksPath[0][0];
+    let cloth_mask_path = clothsAndMasksPath[0][1];
+    let cloth_key = cloth_path + ":" + cloth_mask_path;
+    let tryon_path = cloth_path + ":" + person_key;
+    let tryon_graph_output = this.tryon_graph_output_map.getItem(tryon_path);
+    if (tryon_graph_output !== null) {
+      return await converTensorToDataUrls(tryon_graph_output["person"]);
+    } else {
+      await this.ensureChecks();
+      let person_graph_output =
+        this.person_graph_output_map.getItem(person_key);
+      if (person_graph_output === null) {
+        let person_tensor = await convertDataUrlsToTensor([person_data_url!]);
+        let person_inputs = {
+          person: person_tensor as tf.Tensor4D,
+        };
+        person_graph_output = await this.person_graph(person_inputs);
       }
+      let cloth_graph_output = this.cloth_graph_output_map.getItem(cloth_key);
+      if (cloth_graph_output === null) {
+        let cloths_tensor = await convertImageUrlToTensor([cloth_path]);
+        let cloths_mask_tensor = await convertMaskUrlToTensor([
+          cloth_mask_path,
+        ]);
+        cloth_graph_output = {
+          cloth_mask: cloths_mask_tensor,
+          cloth: cloths_tensor,
+        };
+      }
+
+      let tryon_graph_outputs = await this.tryon_graph(
+        cloth_graph_output,
+        person_graph_output
+      );
+      tf.dispose(cloth_graph_output);
+      tf.dispose(person_graph_output);
+      let tryon_person_data_array = await converTensorToDataUrls(
+        tryon_graph_outputs["person"] as tf.Tensor4D
+      );
+      tf.dispose(tryon_graph_outputs);
+      return tryon_person_data_array;
     }
   }
 

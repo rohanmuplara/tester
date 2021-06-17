@@ -30,7 +30,7 @@ export async function convert_files_to_img_data(
 interface OnLoadAble {
   onload: any;
 }
-function onload2promise<T extends OnLoadAble>(obj: T): Promise<T> {
+export function onload2promise<T extends OnLoadAble>(obj: T): Promise<T> {
   return new Promise((resolve, reject) => {
     obj.onload = () => resolve(obj);
   });
