@@ -10,7 +10,7 @@ export class Client_Wrapper {
     return null;
   }
 
-  runTryonServer(
+  _runTryonServer(
     clothsAndMasksPath: ClothandMaskPath[],
     person_key: string,
     person_data_url?: string
@@ -26,11 +26,11 @@ export class Client_Wrapper {
     let cloth_path = clothsAndMasksPath[0][0];
     let cloth_mask_path = clothsAndMasksPath[0][1];
     let cloth_key = cloth_path + ":" + cloth_mask_path;
-    let tryon_key = cloth_path + ":" + person_key;
-    if (this.tryonMap.has(person_key)) {
-      return this.tryonMap.get(person_key)!;
+    let tryon_key = cloth_key + ":" + person_key;
+    if (this.tryonMap.has(tryon_key)) {
+      return this.tryonMap.get(tryon_key)!;
     } else {
-      let tryonResult = this.runTryonServer(
+      let tryonResult = this._runTryonServer(
         clothsAndMasksPath,
         person_key,
         person_data_url

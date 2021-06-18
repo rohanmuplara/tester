@@ -146,7 +146,7 @@ export abstract class BaseTfjs {
     let cloth_path = clothsAndMasksPath[0][0];
     let cloth_mask_path = clothsAndMasksPath[0][1];
     let cloth_key = cloth_path + ":" + cloth_mask_path;
-    let tryon_key = cloth_path + ":" + person_key;
+    let tryon_key = cloth_key + ":" + person_key;
     let tryon_graph_output =
       await this.tryon_graph_output_map.getNamedTensorMap(tryon_key);
     if (tryon_graph_output !== null) {
