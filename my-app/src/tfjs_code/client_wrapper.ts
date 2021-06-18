@@ -5,15 +5,23 @@ export class Client_Wrapper {
   personKey: string | null;
   constructor() {
     this.tryonMap = new Map<string, string[]>();
-    this.personKey = this.getExistingPersonKey();
+    this.personKey = null;
   }
 
-  getExistingPersonKey(): string | null {
-    // index array from server on 0
-    return null;
+  async setPersonKey() {
+    let personKeyResults = await this._getPersonKeyServer();
+    if (personKeyResults === null) {
+      this.personKey = personKeyResults;
+    } else {
+      this.personKey = personKeyResults[0];
+    }
   }
 
-  _runTryonServer(
+  async _getPersonKeyServer(): Promise<string[] | null> {
+    return ["a", "b", "c"];
+  }
+
+  async _runTryonServer(
     clothsAndMasksPath: ClothandMaskPath[],
     person_key: string,
     person_data_url?: string
@@ -34,7 +42,7 @@ export class Client_Wrapper {
     if (this.tryonMap.has(tryon_key)) {
       return this.tryonMap.get(tryon_key)!;
     } else {
-      let tryonResult = this._runTryonServer(
+      let tryonResult = await this._runTryonServer(
         clothsAndMasksPath,
         person_key,
         person_data_url
