@@ -57,7 +57,6 @@ export function downloadImageDataUrls(
   imageDataUrls: string[],
   names: string[]
 ) {
-  debugger;
   imageDataUrls.forEach((imageDataUrl, index) => {
     let fake_link = document.createElement("a");
     console.log("entering fake link");

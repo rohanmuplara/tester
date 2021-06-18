@@ -36,18 +36,18 @@ export async function runModel(
   return constructMap(tensorOutputNames, predictionsTensor);
 }
 export function constructMap(names: string[], arrayValues: any) {
-  let output_dict: any = {};
+  let outputDict: any = {};
   // if there is only 1 output tensor, tfjs returns it instead of an array of length 1 so can't iterate like below
   if (names.length === 1) {
-    output_dict[names[0]] = arrayValues;
+    outputDict[names[0]] = arrayValues;
   } else {
     for (let i = 0; i < names.length; i++) {
       let name = names[i];
       let arrayValue = arrayValues[i];
-      output_dict[name] = arrayValue;
+      outputDict[name] = arrayValue;
     }
   }
-  return output_dict;
+  return outputDict;
 }
 export async function drawToCanvas(
   tensor: tf.Tensor4D,
@@ -56,9 +56,9 @@ export async function drawToCanvas(
   await Promise.all(
     canvases.map(async (canvas, index) => {
       tensor = tf.cast(tensor, "int32");
-      let batch_element = tf.squeeze(tensor, [index]) as tf.Tensor3D;
-      await tf.browser.toPixels(batch_element, canvas)!;
-      tf.dispose(batch_element);
+      let batchElement = tf.squeeze(tensor, [index]) as tf.Tensor3D;
+      await tf.browser.toPixels(batchElement, canvas)!;
+      tf.dispose(batchElement);
     })
   );
 }
@@ -69,12 +69,12 @@ export async function downloadTensorAsImage(
   tensor: tf.Tensor4D,
   names: [string]
 ) {
-  let canvas_height = tensor.shape[1];
-  let canvas_width = tensor.shape[2];
+  let canvasHeight = tensor.shape[1];
+  let canvasWidth = tensor.shape[2];
   const canvases = names.map(() => {
     let canvas = document.createElement("canvas");
-    canvas.height = canvas_height;
-    canvas.width = canvas_width;
+    canvas.height = canvasHeight;
+    canvas.width = canvasWidth;
     return canvas;
   });
   await drawToCanvas(tensor, canvases);
@@ -130,36 +130,36 @@ export function convertMaskToColors(mask: tf.Tensor4D): tf.Tensor4D {
 }
 
 export async function convertMaskUrlToTensor(
-  mask_urls: string[]
+  maskUrls: string[]
 ): Promise<tf.Tensor4D> {
-  let mask_tensors = await Promise.all(
-    mask_urls.map(async (mask_url) => {
-      let mask = (await downloadImages([mask_url]))[0];
-      let mask_tensor = tf.browser.fromPixels(mask, 1);
-      let mask_float_tensor = tf.cast(mask_tensor, "float32");
-      tf.dispose(mask_tensor);
-      return mask_float_tensor;
+  let maskTensors = await Promise.all(
+    maskUrls.map(async (maskUrl) => {
+      let mask = (await downloadImages([maskUrl]))[0];
+      let maskTensor = tf.browser.fromPixels(mask, 1);
+      let maskFloatTensor = tf.cast(maskTensor, "float32");
+      tf.dispose(maskTensor);
+      return maskFloatTensor;
     })
   );
-  let stacked_tensor = tf.stack(mask_tensors) as tf.Tensor4D;
-  tf.dispose(mask_tensors);
+  let stacked_tensor = tf.stack(maskTensors) as tf.Tensor4D;
+  tf.dispose(maskTensors);
   return stacked_tensor;
 }
 
 export async function convertImageUrlToTensor(
-  image_urls: string[]
+  imageUrls: string[]
 ): Promise<tf.Tensor4D> {
-  let image_tensors = await Promise.all(
-    image_urls.map(async (image_url) => {
-      let image = (await downloadImages([image_url]))[0];
-      let image_tensor = tf.browser.fromPixels(image, 3);
-      let image_float_tensor = tf.cast(image_tensor, "float32");
-      tf.dispose(image_tensor);
-      return image_float_tensor as tf.Tensor3D;
+  let imageTensors = await Promise.all(
+    imageUrls.map(async (imageIrl) => {
+      let image = (await downloadImages([imageIrl]))[0];
+      let imageTensor = tf.browser.fromPixels(image, 3);
+      let imageFloatTensor = tf.cast(imageTensor, "float32");
+      tf.dispose(imageTensor);
+      return imageFloatTensor as tf.Tensor3D;
     })
   );
-  let stacked_tensor = tf.stack(image_tensors) as tf.Tensor4D;
-  tf.dispose(image_tensors);
+  let stacked_tensor = tf.stack(imageTensors) as tf.Tensor4D;
+  tf.dispose(imageTensors);
   return stacked_tensor;
 }
 
@@ -175,8 +175,9 @@ export async function convertDataUrlsToTensor(
       return tf.browser.fromPixels(image, 3);
     })
   );
-  let stacked_tensor = tf.stack(tensorsArray) as tf.Tensor4D;
-  return stacked_tensor;
+  let stackedTensor = tf.stack(tensorsArray) as tf.Tensor4D;
+  let stackedFloatTensor = tf.cast(stackedTensor, "float32");
+  return stackedFloatTensor;
 }
 
 export async function converTensorToDataUrls(

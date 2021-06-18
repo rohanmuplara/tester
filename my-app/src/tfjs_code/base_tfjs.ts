@@ -135,6 +135,7 @@ export abstract class BaseTfjs {
     tf.dispose(cloth_graph_output);
     tf.dispose(person_graph_output);
     tf.dispose(tryon_graph_output);
+    console.log("we are done running dumm inputs");
   }
 
   async runTryon(
@@ -159,7 +160,7 @@ export abstract class BaseTfjs {
 
       if (person_graph_output === null) {
         if (person_data_url) {
-          let person_tensor = await convertDataUrlsToTensor([person_data_url!]);
+          let person_tensor = await convertDataUrlsToTensor([person_data_url]);
           let person_inputs = {
             person: person_tensor as tf.Tensor4D,
           };
