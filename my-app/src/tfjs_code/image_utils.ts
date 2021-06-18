@@ -34,11 +34,8 @@ export async function convert_file_to_img_data(file: File): Promise<string> {
     if (fileType === "image/heic") {
       let fetch_result = await fetch(dataUrl);
       let heic_blob = (await fetch_result.blob()) as Blob;
-      console.log("heic blob is" + heic_blob);
       let pngBlob = await heic2any({ blob: heic_blob, toType: "image/png" });
-      console.log("the pngBlob is" + pngBlob);
       let pngDataUrl = URL.createObjectURL(pngBlob);
-      console.log("the pngdataurl is" + pngDataUrl);
       return pngDataUrl;
     }
     return dataUrl;
@@ -53,5 +50,19 @@ interface OnLoadAble {
 export function onload2promise<T extends OnLoadAble>(obj: T): Promise<T> {
   return new Promise((resolve, reject) => {
     obj.onload = () => resolve(obj);
+  });
+}
+
+export function downloadImageDataUrls(
+  imageDataUrls: string[],
+  names: string[]
+) {
+  debugger;
+  imageDataUrls.forEach((imageDataUrl, index) => {
+    let fake_link = document.createElement("a");
+    console.log("entering fake link");
+    fake_link.download = names[index];
+    fake_link.href = imageDataUrl;
+    fake_link.click();
   });
 }

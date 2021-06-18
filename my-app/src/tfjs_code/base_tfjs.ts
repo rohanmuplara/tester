@@ -91,7 +91,7 @@ export abstract class BaseTfjs {
           let index_path = "indexeddb://" + model_name;
           let model = await tf.loadGraphModel(index_path).then(
             (value: tf.GraphModel) => {
-              //this.models_present_indexdb_set.add(model_name);
+              this.models_present_indexdb_set.add(model_name);
               return value;
             },
             (_) => {
@@ -108,6 +108,7 @@ export abstract class BaseTfjs {
   download_models_to_index_db() {
     this.models_map!.forEach((model, model_name) => {
       if (!this.models_present_indexdb_set.has(model_name)) {
+        console.log("the model name is" + model_name);
         let index_path = "indexeddb://" + model_name;
         model.save(index_path);
       }
@@ -122,6 +123,7 @@ export abstract class BaseTfjs {
    */
 
   async runModelWithDummyInputs() {
+    console.log("we are in run model with dummy inputs");
     let cloth_graph_output = this.get_cloth_graph_dummy_outputs();
     let person_input = this.get_person_input_dummy();
     let person_graph_output = await this.person_graph(person_input);
@@ -147,7 +149,7 @@ export abstract class BaseTfjs {
     let tryon_graph_output =
       await this.tryon_graph_output_map.getNamedTensorMap(tryon_key);
     if (tryon_graph_output !== null) {
-      return await converTensorToDataUrls(
+      return converTensorToDataUrls(
         tryon_graph_output["person"] as tf.Tensor4D
       );
     } else {
@@ -156,15 +158,19 @@ export abstract class BaseTfjs {
       await this.ensureChecks();
 
       if (person_graph_output === null) {
-        let person_tensor = await convertDataUrlsToTensor([person_data_url!]);
-        let person_inputs = {
-          person: person_tensor as tf.Tensor4D,
-        };
-        person_graph_output = await this.person_graph(person_inputs);
-        await this.person_graph_output_map.setNameTensorMap(
-          person_key,
-          person_graph_output
-        );
+        if (person_data_url) {
+          let person_tensor = await convertDataUrlsToTensor([person_data_url!]);
+          let person_inputs = {
+            person: person_tensor as tf.Tensor4D,
+          };
+          person_graph_output = await this.person_graph(person_inputs);
+          await this.person_graph_output_map.setNameTensorMap(
+            person_key,
+            person_graph_output
+          );
+        } else {
+          return Promise.reject("Person key does not exist");
+        }
       }
       let cloth_graph_output =
         await this.cloth_graph_output_map.getNamedTensorMap(cloth_key);

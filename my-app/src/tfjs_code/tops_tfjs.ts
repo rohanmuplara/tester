@@ -1,7 +1,7 @@
 import * as tf from "@tensorflow/tfjs";
 import { NamedTensorMap } from "@tensorflow/tfjs";
 import { BaseTfjs, NamedModelPathMap } from "./base_tfjs";
-import { downloadTensorAsImage, runModel } from "./core";
+import { runModel } from "./core";
 export class Tops_Tfjs extends BaseTfjs {
   getModelsPathDict(): NamedModelPathMap {
     return {
@@ -115,7 +115,6 @@ export class Tops_Tfjs extends BaseTfjs {
     tf.dispose(expected_seg_output);
     tf.dispose(tps_output);
     tf.dispose(cloth_inpainting_output);
-    downloadTensorAsImage(skin_inpainting_output["person"], ["fucker"]);
     return skin_inpainting_output;
   }
 }

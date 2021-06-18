@@ -1,13 +1,14 @@
 import { NamedTensorMap } from "@tensorflow/tfjs";
 import * as tf from "@tensorflow/tfjs";
 import { Storage_Map } from "./storage_map";
+import { convertDataUrlsToTensor, converTensorToDataUrls } from "./core";
 
 export class Tensor_Storage_Map extends Storage_Map {
   async setNameTensorMap(key: string, namedTensorMap: NamedTensorMap) {
     let nameArrayMap = await Promise.all(
       Object.entries(namedTensorMap).map(async ([key, tensor]) => {
-        let tensor_array = await tensor.array();
-        return [key, tensor_array];
+        let data_urls = await converTensorToDataUrls(tensor as tf.Tensor4D);
+        return [key, data_urls];
       })
     ).then(Object.fromEntries);
     let jsonStringifiedObject = JSON.stringify(nameArrayMap);
@@ -19,8 +20,8 @@ export class Tensor_Storage_Map extends Storage_Map {
     if (json_value) {
       let nameArrayMap = JSON.parse(json_value);
       let nameTensorEntries = Object.entries(nameArrayMap).map(
-        ([key, array]) => {
-          let tensor = tf.tensor(array as number[]);
+        ([key, dataUrls]) => {
+          let tensor = convertDataUrlsToTensor(dataUrls as string[]);
           return [key, tensor];
         }
       );
