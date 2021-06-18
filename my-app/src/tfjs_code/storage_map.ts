@@ -13,6 +13,7 @@ export class Storage_Map {
   }
   setItem(key: string, value: any): void {
     let namespaced_key = this.namespace + ":" + key;
+    debugger;
     localStorage.setItem(namespaced_key, value);
     this.existing_keys.unshift(key);
     let metaTablePath = this.namespace + ":metadata";

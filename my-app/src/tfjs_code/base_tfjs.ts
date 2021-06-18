@@ -140,7 +140,6 @@ export abstract class BaseTfjs {
     person_key: string,
     person_data_url?: string
   ): Promise<string[]> {
-    debugger;
     let cloth_path = clothsAndMasksPath[0][0];
     let cloth_mask_path = clothsAndMasksPath[0][1];
     let cloth_key = cloth_path + ":" + cloth_mask_path;
