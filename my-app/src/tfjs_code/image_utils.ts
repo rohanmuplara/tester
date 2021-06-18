@@ -15,7 +15,7 @@ export async function downloadImages(
   );
 }
 export function isSupportedImageType(fileType: string): boolean {
-  let set = new Set(["image/png", "image/jpeg", "image/heic"]);
+  let set = new Set(["image/png", "image/jpeg", "image/heic", ""]);
   return set.has(fileType);
 }
 
@@ -31,7 +31,7 @@ export async function convert_file_to_img_data(file: File): Promise<string> {
     fileReader.readAsDataURL(file);
     await fileReaderPromise;
     let dataUrl = fileReader.result as string;
-    if (fileType === "image/heic") {
+    if (fileType === "image/heic" || fileType === "") {
       let fetch_result = await fetch(dataUrl);
       let heic_blob = (await fetch_result.blob()) as Blob;
       let pngBlob = await heic2any({ blob: heic_blob, toType: "image/png" });
