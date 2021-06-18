@@ -25,7 +25,6 @@ export function getKeyNameFromFile(file: File): string {
 
 export async function convert_file_to_img_data(file: File): Promise<string> {
   let fileType = file.type;
-  debugger;
   if (isSupportedImageType(fileType)) {
     let fileReader = new FileReader();
     let fileReaderPromise = onload2promise(fileReader);
@@ -35,8 +34,11 @@ export async function convert_file_to_img_data(file: File): Promise<string> {
     if (fileType === "image/heic") {
       let fetch_result = await fetch(dataUrl);
       let heic_blob = (await fetch_result.blob()) as Blob;
+      console.log("heic blob is" + heic_blob);
       let pngBlob = await heic2any({ blob: heic_blob, toType: "image/png" });
+      console.log("the pngBlob is" + pngBlob);
       let pngDataUrl = URL.createObjectURL(pngBlob);
+      console.log("the pngdataurl is" + pngDataUrl);
       return pngDataUrl;
     }
     return dataUrl;

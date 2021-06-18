@@ -25,6 +25,7 @@ function App() {
       (data) => data,
       (error) => console.log(error + "we don't support this file type")
     );
+    console.log("the person image data url" + person_image_data_url);
     let person_key = getKeyNameFromFile(uploadedFiles[0]);
     let cloths_path_array = [
       [
