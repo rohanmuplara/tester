@@ -2,11 +2,14 @@ import { ClothandMaskPath } from "./base_tfjs";
 
 export class Client_Wrapper {
   tryonMap: Map<string, string[]>;
+  personKey: string | null;
   constructor() {
     this.tryonMap = new Map<string, string[]>();
+    this.personKey = this.getExistingPersonKey();
   }
 
   getExistingPersonKey(): string | null {
+    // index array from server on 0
     return null;
   }
 
@@ -23,6 +26,7 @@ export class Client_Wrapper {
     person_key: string,
     person_data_url?: string
   ): Promise<string[]> {
+    this.personKey = person_key;
     let cloth_path = clothsAndMasksPath[0][0];
     let cloth_mask_path = clothsAndMasksPath[0][1];
     let cloth_key = cloth_path + ":" + cloth_mask_path;

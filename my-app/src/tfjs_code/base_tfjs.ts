@@ -225,7 +225,7 @@ export abstract class BaseTfjs {
     return;
   }
 
-  getPersonImages(): string[] {
+  getPersonKeys(): string[] {
     return this.person_graph_output_map.getExistingKeys();
   }
 }
