@@ -65,13 +65,16 @@ export abstract class BaseTfjs {
     this.models_present_indexdb_set = new Set<string>();
     this.models_ready = false;
     this.cloth_graph_output_map = new Tensor_Storage_Map(
-      "cloth_graph_output_map"
+      "cloth_graph_output_map",
+      3
     );
     this.person_graph_output_map = new Tensor_Storage_Map(
-      "person_graph_output_map"
+      "person_graph_output_map",
+      3
     );
     this.tryon_graph_output_map = new Tensor_Storage_Map(
-      "tryons_graph_output_map"
+      "tryons_graph_output_map",
+      3
     );
     this.initializeProcess();
   }
