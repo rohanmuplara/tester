@@ -8,7 +8,7 @@ export class Tensor_Storage_Map extends Storage_Map {
     let nameArrayMap = await Promise.all(
       Object.entries(namedTensorMap).map(async ([key, tensor]) => {
         let dataUrls = await converTensorToDataUrls(tensor as tf.Tensor4D);
-        let lastDimensionShape = tensor.shape[-1];
+        let lastDimensionShape = tensor.shape[3];
         return [
           key,
           { lastDimensionShape: lastDimensionShape, dataUrls: dataUrls },
@@ -29,7 +29,7 @@ export class Tensor_Storage_Map extends Storage_Map {
             let tensor = await convertDataUrlsToTensor(dataUrls);
             let newTensor;
             if (lastDimensionShape === 1) {
-              newTensor = tf.split(tensor, -1)[0];
+              newTensor = tf.split(tensor, 3, 3)[0];
             } else {
               newTensor = tensor;
             }
