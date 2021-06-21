@@ -208,6 +208,7 @@ export async function converTensorToDataUrls(
     })
   );
   tf.dispose(int32tensor);
+  tf.dispose(newtensor);
   tf.dispose(individualTensors);
   return dataUrls;
 }
