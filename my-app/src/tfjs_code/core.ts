@@ -186,7 +186,14 @@ export async function converTensorToDataUrls(
   tensor: tf.Tensor4D
 ): Promise<string[]> {
   let int32tensor = tf.cast(tensor, "int32");
-  let individualTensors = tf.unstack(int32tensor) as tf.Tensor3D[];
+  let depth = int32tensor.shape[-1];
+  let newtensor;
+  if (depth === 1) {
+    newtensor = tf.concat([int32tensor, int32tensor, int32tensor], -1);
+  } else {
+    newtensor = int32tensor;
+  }
+  let individualTensors = tf.unstack(newtensor) as tf.Tensor3D[];
   let height = int32tensor.shape[1];
   let width = int32tensor.shape[2];
   let dataUrls = await Promise.all(
