@@ -179,6 +179,8 @@ export async function convertDataUrlsToTensor(
   );
   let stackedTensor = tf.stack(tensorsArray) as tf.Tensor4D;
   let stackedFloatTensor = tf.cast(stackedTensor, "float32");
+  tf.dispose(stackedTensor);
+
   return stackedFloatTensor;
 }
 
@@ -189,7 +191,7 @@ export async function converTensorToDataUrls(
   let depth = int32tensor.shape[-1];
   let newtensor;
   if (depth === 1) {
-    newtensor = tf.concat([int32tensor, int32tensor, int32tensor], -1);
+    newtensor = tf.tile(int32tensor, [1, 1, 1, 3]);
   } else {
     newtensor = int32tensor;
   }
