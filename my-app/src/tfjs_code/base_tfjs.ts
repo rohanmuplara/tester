@@ -1,5 +1,6 @@
 import * as tf from "@tensorflow/tfjs-core";
 import * as tfc from "@tensorflow/tfjs-converter";
+import "@tensorflow/tfjs-backend-webgl";
 
 import { NamedTensorMap } from "@tensorflow/tfjs-core";
 import {
