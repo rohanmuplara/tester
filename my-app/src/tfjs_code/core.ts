@@ -1,4 +1,6 @@
-import * as tf from "@tensorflow/tfjs";
+import * as tf from "@tensorflow/tfjs-core";
+import * as tfc from "@tensorflow/tfjs-converter";
+
 import { downloadImages, onload2promise } from "./image_utils";
 
 /**
@@ -17,7 +19,7 @@ import { downloadImages, onload2promise } from "./image_utils";
  *
  */
 export async function runModel(
-  model: tf.GraphModel,
+  model: tfc.GraphModel,
   tensorMap: any,
   tensorOutputNames: string[],
   isNonBranching: boolean
@@ -184,7 +186,7 @@ export async function converTensorToDataUrls(
   tensor: tf.Tensor4D
 ): Promise<string[]> {
   let int32tensor = tf.cast(tensor, "int32");
-  let individualTensors = int32tensor.unstack() as tf.Tensor3D[];
+  let individualTensors = tf.unstack(int32tensor) as tf.Tensor3D[];
   let height = int32tensor.shape[1];
   let width = int32tensor.shape[2];
   let dataUrls = await Promise.all(

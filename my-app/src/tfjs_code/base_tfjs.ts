@@ -1,5 +1,7 @@
-import * as tf from "@tensorflow/tfjs";
-import { NamedTensorMap } from "@tensorflow/tfjs";
+import * as tf from "@tensorflow/tfjs-core";
+import * as tfc from "@tensorflow/tfjs-converter";
+
+import { NamedTensorMap } from "@tensorflow/tfjs-core";
 import {
   convertMaskUrlToTensor,
   convertImageUrlToTensor,
@@ -10,7 +12,7 @@ import { Tensor_Storage_Map } from "./tensor_storage_map";
 
 // copied naming patterns from tfjs
 export type NamedModelMap = {
-  [name: string]: tf.GraphModel;
+  [name: string]: tfc.GraphModel;
 };
 
 export type NamedModelPathMap = {
@@ -19,7 +21,7 @@ export type NamedModelPathMap = {
 
 export type ClothandMaskPath = [string, string];
 export abstract class BaseTfjs {
-  models_map: Map<string, tf.GraphModel> | undefined;
+  models_map: Map<string, tfc.GraphModel> | undefined;
 
   models_present_indexdb_set: Set<string>;
 
@@ -89,13 +91,13 @@ export abstract class BaseTfjs {
       Object.entries(models_paths_dict).map(
         async ([model_name, model_path]) => {
           let index_path = "indexeddb://" + model_name;
-          let model = await tf.loadGraphModel(index_path).then(
-            (value: tf.GraphModel) => {
+          let model = await tfc.loadGraphModel(index_path).then(
+            (value: tfc.GraphModel) => {
               this.models_present_indexdb_set.add(model_name);
               return value;
             },
             (_) => {
-              return tf.loadGraphModel(model_path);
+              return tfc.loadGraphModel(model_path);
             }
           );
           return [model_name, model];
@@ -212,7 +214,7 @@ export abstract class BaseTfjs {
 
   disposeModelFromGpu(): void {
     if (this.models_map) {
-      this.models_map.forEach((model: tf.GraphModel, _) => {
+      this.models_map.forEach((model: tfc.GraphModel, _) => {
         model.dispose();
       });
     }

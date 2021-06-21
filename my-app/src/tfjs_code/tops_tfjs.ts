@@ -1,5 +1,5 @@
-import * as tf from "@tensorflow/tfjs";
-import { NamedTensorMap } from "@tensorflow/tfjs";
+import * as tf from "@tensorflow/tfjs-core";
+import { NamedTensorMap } from "@tensorflow/tfjs-core";
 import { BaseTfjs, NamedModelPathMap } from "./base_tfjs";
 import { runModel } from "./core";
 export class Tops_Tfjs extends BaseTfjs {

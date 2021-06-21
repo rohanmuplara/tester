@@ -1,7 +1,6 @@
-import { NamedTensorMap } from "@tensorflow/tfjs";
-import * as tf from "@tensorflow/tfjs";
+import { NamedTensorMap } from "@tensorflow/tfjs-core";
+import * as tf from "@tensorflow/tfjs-core";
 import { Storage_Map } from "./storage_map";
-import { convertDataUrlsToTensor, converTensorToDataUrls } from "./core";
 
 export class Tensor_Storage_Map extends Storage_Map {
   async setNameTensorMap(key: string, namedTensorMap: NamedTensorMap) {
