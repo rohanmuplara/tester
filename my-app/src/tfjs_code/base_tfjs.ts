@@ -8,6 +8,7 @@ import {
   convertImageUrlToTensor,
   converTensorToDataUrls,
   convertDataUrlsToTensor,
+  downloadNameTensorMap,
 } from "./core";
 import { Tensor_Storage_Map } from "./tensor_storage_map";
 
@@ -164,6 +165,7 @@ export abstract class BaseTfjs {
         return Promise.reject("Person key does not exist");
       }
     }
+
     let cloths_tensor = await convertImageUrlToTensor([cloth_path]);
     let cloths_mask_tensor = await convertMaskUrlToTensor([cloth_mask_path]);
     let cloth_graph_output: NamedTensorMap = {
@@ -175,7 +177,11 @@ export abstract class BaseTfjs {
       cloth_graph_output,
       person_graph_output
     );
-
+    if (this.debug_mode) {
+      await downloadNameTensorMap(cloth_graph_output);
+      await downloadNameTensorMap(person_graph_output);
+      await downloadNameTensorMap(tryon_graph_output);
+    }
     tf.dispose(cloth_graph_output);
     tf.dispose(person_graph_output);
 
