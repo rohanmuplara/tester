@@ -2,6 +2,7 @@ import * as tf from "@tensorflow/tfjs-core";
 import * as tfc from "@tensorflow/tfjs-converter";
 
 import { downloadImages, onload2promise } from "./image_utils";
+import { NamedTensorMap } from "@tensorflow/tfjs-core";
 
 /**
  * Tensor references are way more efficent because they don't come back from the gpu to the cpu.
@@ -182,6 +183,15 @@ export async function convertDataUrlsToTensor(
   tf.dispose(stackedTensor);
 
   return stackedFloatTensor;
+}
+
+export async function downloadNameTensorMap(
+  namedTensorMap: NamedTensorMap
+): Promise<void> {
+  Object.entries(namedTensorMap).forEach(([name, tensor]) => {
+    downloadTensorAsImage(tensor as tf.Tensor4D, [name]);
+  });
+ 
 }
 
 export async function converTensorToDataUrls(

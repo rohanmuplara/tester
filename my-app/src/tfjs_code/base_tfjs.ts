@@ -28,6 +28,8 @@ export abstract class BaseTfjs {
 
   models_ready: boolean;
 
+  debug_mode: boolean;
+
   person_graph_output_map: Tensor_Storage_Map;
 
   abstract getModelsPathDict(): NamedModelPathMap;
@@ -57,7 +59,8 @@ export abstract class BaseTfjs {
     return { person: tf.ones([1, 256, 192, 3]) };
   }
 
-  constructor() {
+  constructor(debug_mode: boolean) {
+    this.debug_mode = debug_mode;
     this.models_present_indexdb_set = new Set<string>();
     this.models_ready = false;
 
