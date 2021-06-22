@@ -185,13 +185,15 @@ export async function convertDataUrlsToTensor(
   return stackedFloatTensor;
 }
 
-export async function downloadNameTensorMap(
-  namedTensorMap: NamedTensorMap
-): Promise<void> {
-  Object.entries(namedTensorMap).forEach(([name, tensor]) => {
+export function downloadNameTensorMap(namedTensorMap: NamedTensorMap) {
+  Object.entries(namedTensorMap).forEach(async ([name, tensor]) => {
+    if (tensor.shape[3] === 1) {
+      let newTensor = await convertMaskToColors(tensor as tf.Tensor4D);
+      downloadTensorAsImage(newTensor as tf.Tensor4D, [name]);
+      tf.dispose(newTensor);
+    }
     downloadTensorAsImage(tensor as tf.Tensor4D, [name]);
   });
- 
 }
 
 export async function converTensorToDataUrls(
