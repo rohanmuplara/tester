@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import "./App.css";
 import { ClothandMaskPath } from "./tfjs_code/base_tfjs";
+import * as tf from "@tensorflow/tfjs-core";
 import {
   convert_file_to_img_data,
   downloadImageDataUrls,
@@ -35,13 +36,14 @@ function App() {
         "https://storage.googleapis.com/uplara_tfjs/cloth_images/c/cloth_mask.png",
       ],
     ] as ClothandMaskPath[];
-    console.log("first tryon");
+    console.log("first tryon" + tf.memory().numBytes);
 
     let imageDataUrl = await refContainer.current!.runTryon(
       cloths_path_array,
       person_key,
       person_image_data_url!
     );
+    console.log("first tryon end" + tf.memory().numBytes);
     let imageData2Url = await refContainer.current!.runTryon(
       cloths_path_array,
       person_key

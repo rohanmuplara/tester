@@ -30,7 +30,9 @@ export class Tensor_Storage_Map extends Storage_Map {
             if (lastDimensionShape === 1) {
               let tensorList = tf.split(tensor, 3, 3);
               newTensor = tensorList[0];
-              tf.dispose(tensorList);
+              tf.dispose(tensorList[1]);
+              tf.dispose(tensorList[2]);
+
               tf.dispose(tensor);
             } else {
               newTensor = tensor;
