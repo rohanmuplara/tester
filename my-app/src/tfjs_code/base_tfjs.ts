@@ -123,7 +123,7 @@ export abstract class BaseTfjs {
    */
 
   async runModelWithDummyInputs() {
-    console.log("we are in run model with dummy inputs");
+    console.log("we are in run model with dummy inputs" + tf.memory().numBytes);
     let cloth_graph_output = this.get_cloth_graph_dummy_outputs();
     let person_input = this.get_person_input_dummy();
     let person_graph_output = await this.person_graph(person_input);
@@ -135,7 +135,7 @@ export abstract class BaseTfjs {
     tf.dispose(cloth_graph_output);
     tf.dispose(person_graph_output);
     tf.dispose(tryon_graph_output);
-    console.log("we are done running dumm inputs");
+    console.log("we are done running dumm inputs" + tf.memory().numBytes);
   }
 
   async runTryon(
@@ -161,6 +161,7 @@ export abstract class BaseTfjs {
           person_key,
           person_graph_output
         );
+        tf.dispose(person_inputs);
       } else {
         return Promise.reject("Person key does not exist");
       }
@@ -177,6 +178,8 @@ export abstract class BaseTfjs {
       cloth_graph_output,
       person_graph_output
     );
+    tf.dispose(cloths_tensor);
+    tf.dispose(cloths_mask_tensor);
     if (this.debug_mode) {
       await downloadNameTensorMap(cloth_graph_output);
       await downloadNameTensorMap(person_graph_output);
