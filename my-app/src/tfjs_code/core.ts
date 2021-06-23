@@ -181,6 +181,7 @@ export async function convertDataUrlsToTensor(
   let stackedTensor = tf.stack(tensorsArray) as tf.Tensor4D;
   let stackedFloatTensor = tf.cast(stackedTensor, "float32");
   tf.dispose(stackedTensor);
+  tf.dispose(tensorsArray);
 
   return stackedFloatTensor;
 }
