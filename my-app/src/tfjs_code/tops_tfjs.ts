@@ -33,6 +33,7 @@ export class Tops_Tfjs extends BaseTfjs {
       ["person"],
       false
     );
+    tf.dispose(person);
     let denspose_output = await runModel(
       this.models_map!.get("denspose")!,
       { person: person_detection_output["person"] },
