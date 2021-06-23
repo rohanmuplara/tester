@@ -23,13 +23,14 @@ export class Tensor_Storage_Map extends Storage_Map {
       let nameTensorEntries = await Promise.all(
         Object.entries(nameValueMap).map(
           async ([key, serializedDict]: [string, any]) => {
-            //let tensor = await convertDataUrlsToTensor(dataUrls as string[]);
             let lastDimensionShape = serializedDict["lastDimensionShape"];
             let dataUrls = serializedDict["dataUrls"];
             let tensor = await convertDataUrlsToTensor(dataUrls);
             let newTensor;
             if (lastDimensionShape === 1) {
-              newTensor = tf.split(tensor, 3, 3)[0];
+              let tensorList = tf.split(tensor, 3, 3);
+              newTensor = tensorList[0];
+              tf.dispose(tensorList);
               tf.dispose(tensor);
             } else {
               newTensor = tensor;
