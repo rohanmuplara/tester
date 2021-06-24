@@ -178,13 +178,14 @@ export abstract class BaseTfjs {
       cloth_graph_output,
       person_graph_output
     );
-    tf.dispose(cloths_tensor);
-    tf.dispose(cloths_mask_tensor);
+
     if (this.debug_mode) {
       await downloadNameTensorMap(cloth_graph_output);
       await downloadNameTensorMap(person_graph_output);
       await downloadNameTensorMap(tryon_graph_output);
     }
+    tf.dispose(cloths_tensor);
+    tf.dispose(cloths_mask_tensor);
     tf.dispose(cloth_graph_output);
     tf.dispose(person_graph_output);
 
