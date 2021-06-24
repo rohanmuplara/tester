@@ -1,13 +1,13 @@
-import { NamedTensorMap } from "@tensorflow/tfjs-core";
 import * as tf from "@tensorflow/tfjs-core";
 import { Storage_Map } from "./storage_map";
 import { convertDataUrlsToTensor, converTensorToDataUrls } from "./core";
+import { NamedTensor4DMap } from "./base_tfjs";
 
 export class Tensor_Storage_Map extends Storage_Map {
-  async setNameTensorMap(key: string, namedTensorMap: NamedTensorMap) {
+  async setNameTensorMap(key: string, namedTensorMap: NamedTensor4DMap) {
     let nameArrayMap = await Promise.all(
       Object.entries(namedTensorMap).map(async ([key, tensor]) => {
-        let dataUrls = await converTensorToDataUrls(tensor as tf.Tensor4D);
+        let dataUrls = await converTensorToDataUrls(tensor);
         let lastDimensionShape = tensor.shape[3];
         return [
           key,
@@ -17,7 +17,7 @@ export class Tensor_Storage_Map extends Storage_Map {
     ).then(Object.fromEntries);
     this.setItem(key, nameArrayMap);
   }
-  async getNamedTensorMap(key: string): Promise<NamedTensorMap | null> {
+  async getNamedTensorMap(key: string): Promise<NamedTensor4DMap | null> {
     let nameValueMap = await this.getItem(key);
     if (nameValueMap) {
       let nameTensorEntries = await Promise.all(
@@ -41,7 +41,7 @@ export class Tensor_Storage_Map extends Storage_Map {
           }
         )
       );
-      return Object.fromEntries(nameTensorEntries) as NamedTensorMap;
+      return Object.fromEntries(nameTensorEntries) as NamedTensor4DMap;
     } else {
       return null;
     }

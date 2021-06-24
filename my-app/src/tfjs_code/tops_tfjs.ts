@@ -1,6 +1,5 @@
 import * as tf from "@tensorflow/tfjs-core";
-import { NamedTensorMap } from "@tensorflow/tfjs-core";
-import { BaseTfjs, NamedModelPathMap } from "./base_tfjs";
+import { BaseTfjs, NamedModelPathMap, NamedTensor4DMap } from "./base_tfjs";
 import { runModel } from "./core";
 export class Tops_Tfjs extends BaseTfjs {
   getModelsPathDict(): NamedModelPathMap {
@@ -24,9 +23,9 @@ export class Tops_Tfjs extends BaseTfjs {
   }
 
   async person_graph(
-    person_graph_inputs: NamedTensorMap
-  ): Promise<NamedTensorMap> {
-    let person = tf.cast(person_graph_inputs["person"] as tf.Tensor, "float32");
+    person_graph_inputs: NamedTensor4DMap
+  ): Promise<NamedTensor4DMap> {
+    let person = tf.cast(person_graph_inputs["person"], "float32");
     let person_detection_output = await runModel(
       this.models_map!.get("person_detection")!,
       { person: person },
@@ -65,9 +64,9 @@ export class Tops_Tfjs extends BaseTfjs {
   }
 
   async tryon_graph(
-    cloth_graph_outputs: NamedTensorMap,
-    person_graph_outputs: NamedTensorMap
-  ): Promise<NamedTensorMap> {
+    cloth_graph_outputs: NamedTensor4DMap,
+    person_graph_outputs: NamedTensor4DMap
+  ): Promise<NamedTensor4DMap> {
     let expected_seg_output = await runModel(
       this.models_map!.get("expected_seg")!,
       {

@@ -2,7 +2,6 @@ import * as tf from "@tensorflow/tfjs-core";
 import * as tfc from "@tensorflow/tfjs-converter";
 import "@tensorflow/tfjs-backend-webgl";
 
-import { NamedTensorMap } from "@tensorflow/tfjs-core";
 import {
   convertMaskUrlToTensor,
   convertImageUrlToTensor,
@@ -15,6 +14,10 @@ import { Tensor_Storage_Map } from "./tensor_storage_map";
 // copied naming patterns from tfjs
 export type NamedModelMap = {
   [name: string]: tfc.GraphModel;
+};
+
+export type NamedTensor4DMap = {
+  [name: string]: tf.Tensor4D;
 };
 
 export type NamedModelPathMap = {
@@ -37,18 +40,18 @@ export abstract class BaseTfjs {
 
   // dummy  abstract because can't declare abstract async methods
   async tryon_graph(
-    cloth_graph_outputs: NamedTensorMap,
-    person_graph_outputs: NamedTensorMap
-  ): Promise<NamedTensorMap> {
+    cloth_graph_outputs: NamedTensor4DMap,
+    person_graph_outputs: NamedTensor4DMap
+  ): Promise<NamedTensor4DMap> {
     return { "not implemented": tf.tensor(0.0) };
   }
   // dummy  abstract because can't declare abstract async methods
-  async person_graph(person: NamedTensorMap): Promise<NamedTensorMap> {
+  async person_graph(person: NamedTensor4DMap): Promise<NamedTensor4DMap> {
     return { "not implemented": tf.tensor(0.0) };
   }
 
   // should never have to change this but just in case we change inputs cloth_graph gives
-  get_cloth_graph_dummy_outputs(): NamedTensorMap {
+  get_cloth_graph_dummy_outputs(): NamedTensor4DMap {
     return {
       cloth_mask: tf.ones([1, 256, 192, 1]),
       cloth: tf.ones([1, 256, 192, 3]),
@@ -56,7 +59,7 @@ export abstract class BaseTfjs {
   }
 
   // should never have to change this but just in case input person ie shape
-  get_person_input_dummy(): NamedTensorMap {
+  get_person_input_dummy(): NamedTensor4DMap {
     return { person: tf.ones([1, 256, 192, 3]) };
   }
 
@@ -169,7 +172,7 @@ export abstract class BaseTfjs {
 
     let cloths_tensor = await convertImageUrlToTensor([cloth_path]);
     let cloths_mask_tensor = await convertMaskUrlToTensor([cloth_mask_path]);
-    let cloth_graph_output: NamedTensorMap = {
+    let cloth_graph_output: NamedTensor4DMap = {
       cloth_mask: cloths_mask_tensor,
       cloth: cloths_tensor,
     };
