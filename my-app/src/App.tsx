@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import "./App.css";
-import { ClothandMaskPath } from "./tfjs_code/base_tfjs";
+import { ClothandMaskPath, Mode } from "./tfjs_code/base_tfjs";
 import * as tf from "@tensorflow/tfjs-core";
 import {
   convert_file_to_img_data,
@@ -14,7 +14,7 @@ function App() {
   const refContainer = useRef<Tops_Tfjs>();
   useEffect(() => {
     // Update the document title using the browser API
-    refContainer.current = new Tops_Tfjs(false);
+    refContainer.current = new Tops_Tfjs(Mode.Regular);
     console.log("instantiation");
     return refContainer.current.disposeModelFromGpu();
   }, []);

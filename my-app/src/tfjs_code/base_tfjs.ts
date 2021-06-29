@@ -95,6 +95,7 @@ export abstract class BaseTfjs {
       3,
       EvictionPolicy.FIRST_IN_LAST_OUT
     );
+    console.log(this.mode !== Mode.Express);
     if (this.mode !== Mode.Express) {
       this.initializeProcess();
     }
@@ -174,9 +175,11 @@ export abstract class BaseTfjs {
     let clothMaskPath = clothsAndMasksPath[0][1];
 
     let tryonKey = clothPath + "|" + personKey;
+    console.time("tryon graph output1");
     let tryonGraphOutput = await this.tryonGraphOutputMap.getNamedTensorMap(
       tryonKey
     );
+    console.time("tryon graph output1");
     if (tryonGraphOutput === null) {
       let personGraphOutput = await this.personGraphOutputMap.getNamedTensorMap(
         personKey
@@ -202,24 +205,25 @@ export abstract class BaseTfjs {
 
       let clothsTensor = await convertImageUrlToTensor([clothPath]);
       let clothsMaskTensor = await convertMaskUrlToTensor([clothMaskPath]);
-      let clothGrahOutput: NamedTensor4DMap = {
+      let clothGraphOutput: NamedTensor4DMap = {
         clothMask: clothsMaskTensor,
         cloth: clothsTensor,
       };
 
+      debugger;
       tryonGraphOutput = await this.tryon_graph(
-        clothGrahOutput,
+        clothGraphOutput,
         personGraphOutput
       );
 
       if (this.mode === Mode.Debug) {
-        await downloadNameTensorMap(clothGrahOutput);
+        await downloadNameTensorMap(clothGraphOutput);
         await downloadNameTensorMap(personGraphOutput);
         await downloadNameTensorMap(tryonGraphOutput);
       }
       tf.dispose(clothsTensor);
       tf.dispose(clothsMaskTensor);
-      tf.dispose(clothGrahOutput);
+      tf.dispose(clothGraphOutput);
       tf.dispose(personGraphOutput);
     }
     let tryonPersonDataArray = await converTensorToDataUrls(
@@ -228,7 +232,7 @@ export abstract class BaseTfjs {
 
     // We don't do wait for async because there is no gurantee to caller about this
     // and we want to do this relatively quickly
-    this.personGraphOutputMap
+    this.tryonGraphOutputMap
       .setNameTensorMap(tryonKey, tryonGraphOutput)
       .then(() => tf.dispose(tryonGraphOutput!));
 
