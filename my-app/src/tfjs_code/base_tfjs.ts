@@ -33,17 +33,11 @@ export enum Mode {
 export type ClothandMaskPath = [string, string];
 export abstract class BaseTfjs {
   modelsMap: Map<string, tfc.GraphModel> | undefined;
-
   modelsPresentIndexdbSet: Set<string>;
-
   modelsReady: boolean;
-
   mode: Mode;
-
-  personGraphOutputMap: Tensor_Storage_Map;
-
-
-
+  personGraphOutputMap: Tensor_Storage_Map; // used so that if you reload page don't have to upload person
+  tryonGraphOutputMap: Tensor_Storage_Map; // used so that if you reload page, we can populate a tryon image instantly for first cloth
   abstract getModelsPathDict(): NamedModelPathMap;
 
   // dummy  abstract because can't declare abstract async methods
@@ -158,8 +152,9 @@ export abstract class BaseTfjs {
     let cloth_path = clothsAndMasksPath[0][0];
     let cloth_mask_path = clothsAndMasksPath[0][1];
 
-    let person_graph_output =
-      await this.personGraphOutputMap.getNamedTensorMap(person_key);
+    let person_graph_output = await this.personGraphOutputMap.getNamedTensorMap(
+      person_key
+    );
     await this.ensureChecks();
 
     if (person_graph_output === null) {
