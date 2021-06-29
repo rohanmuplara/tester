@@ -32,15 +32,17 @@ export enum Mode {
 
 export type ClothandMaskPath = [string, string];
 export abstract class BaseTfjs {
-  models_map: Map<string, tfc.GraphModel> | undefined;
+  modelsMap: Map<string, tfc.GraphModel> | undefined;
 
-  models_present_indexdb_set: Set<string>;
+  modelsPresentIndexdbSet: Set<string>;
 
-  models_ready: boolean;
+  modelsReady: boolean;
 
   mode: Mode;
 
-  person_graph_output_map: Tensor_Storage_Map;
+  personGraphOutputMap: Tensor_Storage_Map;
+
+
 
   abstract getModelsPathDict(): NamedModelPathMap;
 
@@ -71,10 +73,10 @@ export abstract class BaseTfjs {
 
   constructor(debug_mode: Mode) {
     this.mode = debug_mode;
-    this.models_present_indexdb_set = new Set<string>();
-    this.models_ready = false;
+    this.modelsPresentIndexdbSet = new Set<string>();
+    this.modelsReady = false;
 
-    this.person_graph_output_map = new Tensor_Storage_Map(
+    this.personGraphOutputMap = new Tensor_Storage_Map(
       "person_graph_output_map",
       3
     );
@@ -101,7 +103,7 @@ export abstract class BaseTfjs {
           let index_path = "indexeddb://" + model_name;
           let model = await tfc.loadGraphModel(index_path).then(
             (value: tfc.GraphModel) => {
-              this.models_present_indexdb_set.add(model_name);
+              this.modelsPresentIndexdbSet.add(model_name);
               return value;
             },
             (_) => {
@@ -112,12 +114,12 @@ export abstract class BaseTfjs {
         }
       )
     )) as any;
-    this.models_map = new Map(models_entries);
-    this.models_ready = true;
+    this.modelsMap = new Map(models_entries);
+    this.modelsReady = true;
   }
   download_models_to_index_db() {
-    this.models_map!.forEach((model, model_name) => {
-      if (!this.models_present_indexdb_set.has(model_name)) {
+    this.modelsMap!.forEach((model, model_name) => {
+      if (!this.modelsPresentIndexdbSet.has(model_name)) {
         console.log("the model name is" + model_name);
         let index_path = "indexeddb://" + model_name;
         model.save(index_path);
@@ -157,7 +159,7 @@ export abstract class BaseTfjs {
     let cloth_mask_path = clothsAndMasksPath[0][1];
 
     let person_graph_output =
-      await this.person_graph_output_map.getNamedTensorMap(person_key);
+      await this.personGraphOutputMap.getNamedTensorMap(person_key);
     await this.ensureChecks();
 
     if (person_graph_output === null) {
@@ -167,7 +169,7 @@ export abstract class BaseTfjs {
           person: person_tensor as tf.Tensor4D,
         };
         person_graph_output = await this.person_graph(person_inputs);
-        await this.person_graph_output_map.setNameTensorMap(
+        await this.personGraphOutputMap.setNameTensorMap(
           person_key,
           person_graph_output
         );
@@ -207,21 +209,21 @@ export abstract class BaseTfjs {
   }
 
   disposeModelFromGpu(): void {
-    if (this.models_map) {
-      this.models_map.forEach((model: tfc.GraphModel, _) => {
+    if (this.modelsMap) {
+      this.modelsMap.forEach((model: tfc.GraphModel, _) => {
         model.dispose();
       });
     }
   }
 
   async ensureChecks(): Promise<void> {
-    while (!this.models_ready) {
+    while (!this.modelsReady) {
       await new Promise((resolve) => setTimeout(resolve, 500));
     }
     return;
   }
 
   getPersonKeys(): string[] {
-    return this.person_graph_output_map.getExistingKeys();
+    return this.personGraphOutputMap.getExistingKeys();
   }
 }

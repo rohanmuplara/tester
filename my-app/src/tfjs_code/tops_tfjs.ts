@@ -27,20 +27,20 @@ export class Tops_Tfjs extends BaseTfjs {
   ): Promise<NamedTensor4DMap> {
     let person = tf.cast(person_graph_inputs["person"], "float32");
     let person_detection_output = await runModel(
-      this.models_map!.get("person_detection")!,
+      this.modelsMap!.get("person_detection")!,
       { person: person },
       ["person"],
       false
     );
     tf.dispose(person);
     let denspose_output = await runModel(
-      this.models_map!.get("denspose")!,
+      this.modelsMap!.get("denspose")!,
       { person: person_detection_output["person"] },
       ["denspose_mask"],
       true
     );
     let human_binary_mask_output = await runModel(
-      this.models_map!.get("human_binary_mask")!,
+      this.modelsMap!.get("human_binary_mask")!,
       {
         person: person_detection_output["person"],
         denspose_mask: denspose_output["denspose_mask"],
@@ -49,7 +49,7 @@ export class Tops_Tfjs extends BaseTfjs {
       true
     );
     let human_parsing_output = await runModel(
-      this.models_map!.get("human_parsing")!,
+      this.modelsMap!.get("human_parsing")!,
       {
         person: person_detection_output["person"],
         denspose_mask: denspose_output["denspose_mask"],
@@ -68,7 +68,7 @@ export class Tops_Tfjs extends BaseTfjs {
     person_graph_outputs: NamedTensor4DMap
   ): Promise<NamedTensor4DMap> {
     let expected_seg_output = await runModel(
-      this.models_map!.get("expected_seg")!,
+      this.modelsMap!.get("expected_seg")!,
       {
         person: person_graph_outputs["person"],
         cloth: cloth_graph_outputs["cloth"],
@@ -81,7 +81,7 @@ export class Tops_Tfjs extends BaseTfjs {
     );
 
     let tps_output = await runModel(
-      this.models_map!.get("tps")!,
+      this.modelsMap!.get("tps")!,
       {
         expected_seg_mask: expected_seg_output["expected_seg_mask"],
         cloth: cloth_graph_outputs["cloth"],
@@ -91,7 +91,7 @@ export class Tops_Tfjs extends BaseTfjs {
       false
     );
     let cloth_inpainting_output = await runModel(
-      this.models_map!.get("cloth_inpainting")!,
+      this.modelsMap!.get("cloth_inpainting")!,
       {
         warped_cloth: tps_output["warped_cloth"],
         warped_cloth_mask: tps_output["warped_cloth_mask"],
@@ -102,7 +102,7 @@ export class Tops_Tfjs extends BaseTfjs {
       true
     );
     let skin_inpainting_output = await runModel(
-      this.models_map!.get("skin_inpainting")!,
+      this.modelsMap!.get("skin_inpainting")!,
       {
         person: person_graph_outputs["person"],
         human_parsing_mask: person_graph_outputs["human_parsing_mask"],
