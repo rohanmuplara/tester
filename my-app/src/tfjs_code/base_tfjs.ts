@@ -10,6 +10,7 @@ import {
   downloadNameTensorMap,
 } from "./core";
 import { Tensor_Storage_Map } from "./tensor_storage_map";
+import { EvictionPolicy } from "./storage_map";
 
 // copied naming patterns from tfjs
 export type NamedModelMap = {
@@ -36,8 +37,17 @@ export abstract class BaseTfjs {
   modelsPresentIndexdbSet: Set<string>;
   modelsReady: boolean;
   mode: Mode;
-  personGraphOutputMap: Tensor_Storage_Map; // used so that if you reload page don't have to upload person
-  tryonGraphOutputMap: Tensor_Storage_Map; // used so that if you reload page, we can populate a tryon image instantly for first cloth
+  /**
+   * This person graph output map is first in first out because we want to store most recent person images.
+   *  It is used so that if you reload page don't have to upload person
+   */
+  personGraphOutputMap: Tensor_Storage_Map;
+  /**
+   *  The tryon output is first in last out because the idea if they reload the page, it will be scrolled back
+   * to item 0. The tryon graph output is cached is used so that when you reload the page, we
+   * can prepopulate the tryon image if possible.
+   */
+  tryonGraphOutputMap: Tensor_Storage_Map;
   abstract getModelsPathDict(): NamedModelPathMap;
 
   // dummy  abstract because can't declare abstract async methods
@@ -65,14 +75,25 @@ export abstract class BaseTfjs {
     return { person: tf.ones([1, 256, 192, 3]) };
   }
 
-  constructor(debug_mode: Mode) {
-    this.mode = debug_mode;
+  /**
+   *
+   *
+   *
+   */
+  constructor(mode: Mode) {
+    this.mode = mode;
     this.modelsPresentIndexdbSet = new Set<string>();
     this.modelsReady = false;
 
     this.personGraphOutputMap = new Tensor_Storage_Map(
       "person_graph_output_map",
-      3
+      3,
+      EvictionPolicy.FIRST_IN_FIRST_OUT
+    );
+    this.tryonGraphOutputMap = new Tensor_Storage_Map(
+      "tryon_graph_output_map",
+      3,
+      EvictionPolicy.FIRST_IN_LAST_OUT
     );
     if (this.mode !== Mode.Express) {
       this.initializeProcess();
@@ -146,60 +167,71 @@ export abstract class BaseTfjs {
 
   async runTryon(
     clothsAndMasksPath: ClothandMaskPath[],
-    person_key: string,
-    person_data_url?: string
+    personKey: string,
+    personDataUrl?: string
   ): Promise<string[]> {
-    let cloth_path = clothsAndMasksPath[0][0];
-    let cloth_mask_path = clothsAndMasksPath[0][1];
+    let clothPath = clothsAndMasksPath[0][0];
+    let clothMaskPath = clothsAndMasksPath[0][1];
 
-    let person_graph_output = await this.personGraphOutputMap.getNamedTensorMap(
-      person_key
+    let tryonKey = clothPath + "|" + personKey;
+    let tryonGraphOutput = await this.tryonGraphOutputMap.getNamedTensorMap(
+      tryonKey
     );
-    await this.ensureChecks();
+    if (tryonGraphOutput === null) {
+      let personGraphOutput = await this.personGraphOutputMap.getNamedTensorMap(
+        personKey
+      );
+      await this.ensureChecks();
 
-    if (person_graph_output === null) {
-      if (person_data_url) {
-        let person_tensor = await convertDataUrlsToTensor([person_data_url]);
-        let person_inputs = {
-          person: person_tensor as tf.Tensor4D,
-        };
-        person_graph_output = await this.person_graph(person_inputs);
-        await this.personGraphOutputMap.setNameTensorMap(
-          person_key,
-          person_graph_output
-        );
-        tf.dispose(person_inputs);
-      } else {
-        return Promise.reject("Person key does not exist");
+      if (personGraphOutput === null) {
+        if (personDataUrl) {
+          let personTensor = await convertDataUrlsToTensor([personDataUrl]);
+          let personInputs = {
+            person: personTensor as tf.Tensor4D,
+          };
+          personGraphOutput = await this.person_graph(personInputs);
+          await this.personGraphOutputMap.setNameTensorMap(
+            personKey,
+            personGraphOutput
+          );
+          tf.dispose(personInputs);
+        } else {
+          return Promise.reject("Person key does not exist");
+        }
       }
+
+      let clothsTensor = await convertImageUrlToTensor([clothPath]);
+      let clothsMaskTensor = await convertMaskUrlToTensor([clothMaskPath]);
+      let clothGrahOutput: NamedTensor4DMap = {
+        clothMask: clothsMaskTensor,
+        cloth: clothsTensor,
+      };
+
+      tryonGraphOutput = await this.tryon_graph(
+        clothGrahOutput,
+        personGraphOutput
+      );
+
+      if (this.mode === Mode.Debug) {
+        await downloadNameTensorMap(clothGrahOutput);
+        await downloadNameTensorMap(personGraphOutput);
+        await downloadNameTensorMap(tryonGraphOutput);
+      }
+      tf.dispose(clothsTensor);
+      tf.dispose(clothsMaskTensor);
+      tf.dispose(clothGrahOutput);
+      tf.dispose(personGraphOutput);
     }
-
-    let cloths_tensor = await convertImageUrlToTensor([cloth_path]);
-    let cloths_mask_tensor = await convertMaskUrlToTensor([cloth_mask_path]);
-    let cloth_graph_output: NamedTensor4DMap = {
-      cloth_mask: cloths_mask_tensor,
-      cloth: cloths_tensor,
-    };
-
-    let tryon_graph_output = await this.tryon_graph(
-      cloth_graph_output,
-      person_graph_output
-    );
-
-    if (this.mode === Mode.Debug) {
-      await downloadNameTensorMap(cloth_graph_output);
-      await downloadNameTensorMap(person_graph_output);
-      await downloadNameTensorMap(tryon_graph_output);
-    }
-    tf.dispose(cloths_tensor);
-    tf.dispose(cloths_mask_tensor);
-    tf.dispose(cloth_graph_output);
-    tf.dispose(person_graph_output);
-
     let tryon_person_data_array = await converTensorToDataUrls(
-      tryon_graph_output["person"] as tf.Tensor4D
+      tryonGraphOutput["person"] as tf.Tensor4D
     );
-    tf.dispose(tryon_graph_output);
+
+    // We don't do wait for async because there is no gurantee to caller about this
+    // and we want to do this relatively quickly
+    this.personGraphOutputMap
+      .setNameTensorMap(tryonKey, tryonGraphOutput)
+      .then(() => tf.dispose(tryonGraphOutput!));
+
     return tryon_person_data_array;
   }
 
