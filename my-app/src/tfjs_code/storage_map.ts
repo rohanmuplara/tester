@@ -12,7 +12,7 @@ export enum EvictionPolicy {
  * d. converts all objects to json. However, the caller is responsible to make sure everything converts to json.
  */
 export class Storage_Map {
-  existing_keys: string[];
+  existingKeys: string[];
   namespace: string;
   maxItems: number;
   evictionPolicy: EvictionPolicy;
@@ -25,9 +25,9 @@ export class Storage_Map {
     let metaTablePath = namespace + ":metadata";
     let metaTableData = localStorage.getItem(metaTablePath);
     if (metaTableData === null) {
-      this.existing_keys = [];
+      this.existingKeys = [];
     } else {
-      this.existing_keys = JSON.parse(metaTableData);
+      this.existingKeys = JSON.parse(metaTableData);
     }
     this.maxItems = maxItems;
     this.evictionPolicy = evictionPolicy;
@@ -36,31 +36,31 @@ export class Storage_Map {
     let namespacedKey = this.namespace + ":" + key;
     let jsonValue = JSON.stringify(value);
     localStorage.setItem(namespacedKey, jsonValue);
-    if (this.existing_keys.length === this.maxItems) {
-      let removal_key;
+    if (this.existingKeys.length === this.maxItems) {
+      let removalKey;
       if (this.evictionPolicy === EvictionPolicy.FIRST_IN_FIRST_OUT) {
-        removal_key = this.existing_keys.shift();
+        removalKey = this.existingKeys.shift();
       } else if (this.evictionPolicy === EvictionPolicy.FIRST_IN_LAST_OUT) {
-        removal_key = this.existing_keys.pop();
+        removalKey = this.existingKeys.pop();
       }
-      let removal_namespaced_key = this.namespace + ":" + removal_key;
-      localStorage.removeItem(removal_namespaced_key);
+      let removalNamespacedKey = this.namespace + ":" + removalKey;
+      localStorage.removeItem(removalNamespacedKey);
     }
-    this.existing_keys.push(key);
+    this.existingKeys.push(key);
     let metaTablePath = this.namespace + ":metadata";
-    localStorage.setItem(metaTablePath, JSON.stringify(this.existing_keys));
+    localStorage.setItem(metaTablePath, JSON.stringify(this.existingKeys));
   }
   getItem(key: string): any {
     let namespaced_key = this.namespace + ":" + key;
-    let json_value = localStorage.getItem(namespaced_key);
-    if (json_value) {
-      return JSON.parse(json_value!);
+    let jsonValue = localStorage.getItem(namespaced_key);
+    if (jsonValue) {
+      return JSON.parse(jsonValue!);
     } else {
       return null;
     }
   }
 
   getExistingKeys(): string[] {
-    return this.existing_keys;
+    return this.existingKeys;
   }
 }
