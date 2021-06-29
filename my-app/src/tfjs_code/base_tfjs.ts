@@ -24,6 +24,12 @@ export type NamedModelPathMap = {
   [name: string]: string;
 };
 
+export enum Mode {
+  Regular,
+  Debug, // downloads lots of outputs
+  Express, // just returns input image; useful so when developing don't have to wait for models
+}
+
 export type ClothandMaskPath = [string, string];
 export abstract class BaseTfjs {
   models_map: Map<string, tfc.GraphModel> | undefined;
@@ -32,7 +38,7 @@ export abstract class BaseTfjs {
 
   models_ready: boolean;
 
-  debug_mode: boolean;
+  mode: Mode;
 
   person_graph_output_map: Tensor_Storage_Map;
 
@@ -63,8 +69,8 @@ export abstract class BaseTfjs {
     return { person: tf.ones([1, 256, 192, 3]) };
   }
 
-  constructor(debug_mode: boolean) {
-    this.debug_mode = debug_mode;
+  constructor(debug_mode: Mode) {
+    this.mode = debug_mode;
     this.models_present_indexdb_set = new Set<string>();
     this.models_ready = false;
 
@@ -72,8 +78,9 @@ export abstract class BaseTfjs {
       "person_graph_output_map",
       3
     );
-
-    this.initializeProcess();
+    if (this.mode !== Mode.Express) {
+      this.initializeProcess();
+    }
   }
 
   async initializeProcess() {
@@ -182,7 +189,7 @@ export abstract class BaseTfjs {
       person_graph_output
     );
 
-    if (this.debug_mode) {
+    if (this.mode === Mode.Debug) {
       await downloadNameTensorMap(cloth_graph_output);
       await downloadNameTensorMap(person_graph_output);
       await downloadNameTensorMap(tryon_graph_output);
