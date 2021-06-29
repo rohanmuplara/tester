@@ -206,12 +206,11 @@ export abstract class BaseTfjs {
       let clothsTensor = await convertImageUrlToTensor([clothPath]);
       let clothsMaskTensor = await convertMaskUrlToTensor([clothMaskPath]);
       let clothGraphOutput: NamedTensor4DMap = {
-        clothMask: clothsMaskTensor,
+        cloth_mask: clothsMaskTensor,
         cloth: clothsTensor,
       };
 
-      debugger;
-      tryonGraphOutput = await this.tryon_graph(
+       tryonGraphOutput = await this.tryon_graph(
         clothGraphOutput,
         personGraphOutput
       );
