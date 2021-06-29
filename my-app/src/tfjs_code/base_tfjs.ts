@@ -222,7 +222,7 @@ export abstract class BaseTfjs {
       tf.dispose(clothGrahOutput);
       tf.dispose(personGraphOutput);
     }
-    let tryon_person_data_array = await converTensorToDataUrls(
+    let tryonPersonDataArray = await converTensorToDataUrls(
       tryonGraphOutput["person"] as tf.Tensor4D
     );
 
@@ -232,7 +232,7 @@ export abstract class BaseTfjs {
       .setNameTensorMap(tryonKey, tryonGraphOutput)
       .then(() => tf.dispose(tryonGraphOutput!));
 
-    return tryon_person_data_array;
+    return tryonPersonDataArray;
   }
 
   disposeModelFromGpu(): void {
