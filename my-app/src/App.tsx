@@ -14,7 +14,7 @@ function App() {
   const refContainer = useRef<Tops_Tfjs>();
   useEffect(() => {
     // Update the document title using the browser API
-    refContainer.current = new Tops_Tfjs(Mode.Regular);
+    refContainer.current = new Tops_Tfjs(Mode.Express);
     console.log("instantiation");
     return refContainer.current.disposeModelFromGpu();
   }, []);

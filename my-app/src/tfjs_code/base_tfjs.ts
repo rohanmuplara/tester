@@ -95,7 +95,6 @@ export abstract class BaseTfjs {
       3,
       EvictionPolicy.FIRST_IN_LAST_OUT
     );
-    console.log(this.mode !== Mode.Express);
     if (this.mode !== Mode.Express) {
       this.initializeProcess();
     }
@@ -184,6 +183,22 @@ export abstract class BaseTfjs {
       let personGraphOutput = await this.personGraphOutputMap.getNamedTensorMap(
         personKey
       );
+      if (this.mode === Mode.Express) {
+        let personTensor;
+        if (personGraphOutput === null) {
+          personTensor = await convertDataUrlsToTensor([personDataUrl!]);
+          await this.personGraphOutputMap.setNameTensorMap(personKey, {
+            person: personTensor,
+          });
+        } else {
+          personTensor = personGraphOutput["person"];
+        }
+        let resizedImage = tf.image.resizeBilinear(personTensor, [256, 192]);
+        let url = converTensorToDataUrls(resizedImage);
+        tf.dispose(personTensor);
+        tf.dispose(resizedImage);
+        return url;
+      }
       await this.ensureChecks();
 
       if (personGraphOutput === null) {
@@ -210,7 +225,7 @@ export abstract class BaseTfjs {
         cloth: clothsTensor,
       };
 
-       tryonGraphOutput = await this.tryon_graph(
+      tryonGraphOutput = await this.tryon_graph(
         clothGraphOutput,
         personGraphOutput
       );
