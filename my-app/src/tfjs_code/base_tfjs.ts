@@ -33,6 +33,7 @@ export enum Mode {
 
 export type ClothandMaskPath = [string, string];
 export abstract class BaseTfjs {
+  batchSize: number;
   modelsMap: Map<string, tfc.GraphModel> | undefined;
   modelsPresentIndexdbSet: Set<string>;
   modelsReady: boolean;
@@ -65,14 +66,14 @@ export abstract class BaseTfjs {
   // should never have to change this but just in case we change inputs cloth_graph gives
   get_cloth_graph_dummy_outputs(): NamedTensor4DMap {
     return {
-      cloth_mask: tf.ones([1, 256, 192, 1]),
-      cloth: tf.ones([1, 256, 192, 3]),
+      cloth_mask: tf.ones([this.batchSize, 256, 192, 1]),
+      cloth: tf.ones([this.batchSize, 256, 192, 3]),
     };
   }
 
   // should never have to change this but just in case input person ie shape
   get_person_input_dummy(): NamedTensor4DMap {
-    return { person: tf.ones([1, 256, 192, 3]) };
+    return { person: tf.ones([5, 256, 192, 3]) };
   }
 
   /**
@@ -80,7 +81,8 @@ export abstract class BaseTfjs {
    *
    *
    */
-  constructor(mode: Mode) {
+  constructor(batchSize: number, mode: Mode) {
+    this.batchSize = batchSize;
     this.mode = mode;
     this.modelsPresentIndexdbSet = new Set<string>();
     this.modelsReady = false;
@@ -170,14 +172,20 @@ export abstract class BaseTfjs {
     personKey: string,
     personDataUrl?: string
   ): Promise<string[]> {
-    let clothPath = clothsAndMasksPath[0][0];
-    let clothMaskPath = clothsAndMasksPath[0][1];
+    let newIds = await Promise.all(
+    clothsAndMasksPath.map(async (clothAndMaskPath) => {
+      let clothPath = clothsAndMaskPath[0][0];
+      let tryonKey = clothPath + "|" + personKey;
+      let tryonGraphOutput = await this.tryonGraphOutputMap.getNamedTensorMap(
+        tryonKey
+      );
+      if (tryonGraphOutput) {
 
-    let tryonKey = clothPath + "|" + personKey;
+      }
+    });
+    )
     console.time("tryon graph output1");
-    let tryonGraphOutput = await this.tryonGraphOutputMap.getNamedTensorMap(
-      tryonKey
-    );
+
     console.time("tryon graph output1");
     if (tryonGraphOutput === null) {
       let personGraphOutput = await this.personGraphOutputMap.getNamedTensorMap(
