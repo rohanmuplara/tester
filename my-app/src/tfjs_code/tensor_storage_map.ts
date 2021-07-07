@@ -15,7 +15,7 @@ export class Tensor_Storage_Map extends Storage_Map {
         ];
       })
     ).then(Object.fromEntries);
-    this.setItem(key, nameArrayMap);
+    await this.setItem(key, nameArrayMap);
   }
   async getNamedTensorMap(key: string): Promise<NamedTensor4DMap | null> {
     let nameValueMap = await this.getItem(key);

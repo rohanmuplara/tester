@@ -10,7 +10,7 @@ import {
   downloadNameTensorMap,
 } from "./core";
 import { Tensor_Storage_Map } from "./tensor_storage_map";
-import { EvictionPolicy } from "./storage_map";
+import { EvictionPolicy, StorageType } from "./storage_map";
 
 // copied naming patterns from tfjs
 export type NamedModelMap = {
@@ -90,12 +90,14 @@ export abstract class BaseTfjs {
     this.personGraphOutputMap = new Tensor_Storage_Map(
       "person_graph_output_map",
       3,
-      EvictionPolicy.FIRST_IN_FIRST_OUT
+      EvictionPolicy.FIRST_IN_FIRST_OUT,
+      StorageType.INDEX_DB
     );
     this.tryonGraphOutputMap = new Tensor_Storage_Map(
       "tryon_graph_output_map",
       3,
-      EvictionPolicy.FIRST_IN_LAST_OUT
+      EvictionPolicy.FIRST_IN_LAST_OUT,
+      StorageType.INDEX_DB
     );
     if (this.mode !== Mode.Express) {
       this.initializeProcess();
@@ -172,18 +174,14 @@ export abstract class BaseTfjs {
     personKey: string,
     personDataUrl?: string
   ): Promise<string[]> {
-    let newIds = await Promise.all(
-    clothsAndMasksPath.map(async (clothAndMaskPath) => {
-      let clothPath = clothsAndMaskPath[0][0];
-      let tryonKey = clothPath + "|" + personKey;
-      let tryonGraphOutput = await this.tryonGraphOutputMap.getNamedTensorMap(
-        tryonKey
-      );
-      if (tryonGraphOutput) {
+    let clothsAndMask = await Promise.all(
+      clothsAndMasksPath.map(async (clothAndMaskPath) => {
+        let clothPath = clothAndMaskPath[0];
+        let tryonKey = clothPath + "|" + personKey;
+        return this.tryonGraphOutputMap.getNamedTensorMap(tryonKey);
+      })
+    );
 
-      }
-    });
-    )
     console.time("tryon graph output1");
 
     console.time("tryon graph output1");
@@ -276,7 +274,7 @@ export abstract class BaseTfjs {
     return;
   }
 
-  getPersonKeys(): string[] {
+  async getPersonKeys(): Promise<string[]> {
     return this.personGraphOutputMap.getExistingKeys();
   }
 }
