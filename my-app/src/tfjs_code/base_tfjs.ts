@@ -4,7 +4,7 @@ import "@tensorflow/tfjs-backend-webgl";
 
 import {
   convertMaskUrlToTensor,
-  convertImageUrlToTensor,
+  convertImageUrlsToTensor,
   converTensorToDataUrls,
   convertDataUrlsToTensor,
   downloadNameTensorMap,
@@ -174,18 +174,21 @@ export abstract class BaseTfjs {
     personKey: string,
     personDataUrl?: string
   ): Promise<string[]> {
-    let clothsAndMask = await Promise.all(
+    let tryonOutputs = await Promise.all(
       clothsAndMasksPath.map(async (clothAndMaskPath) => {
         let clothPath = clothAndMaskPath[0];
         let tryonKey = clothPath + "|" + personKey;
         return this.tryonGraphOutputMap.getNamedTensorMap(tryonKey);
       })
     );
+    let uncachedClothsAndMasksPath = [];
+    for (let i = 0; i < tryonOutputs.length; i++) {
+      if (tryonOutputs[i] !== null) {
+        uncachedClothsAndMasksPath.push(clothsAndMasksPath[i]);
+      }
+    }
 
-    console.time("tryon graph output1");
-
-    console.time("tryon graph output1");
-    if (tryonGraphOutput === null) {
+    if (uncachedClothsAndMasksPath.length > 0) {
       let personGraphOutput = await this.personGraphOutputMap.getNamedTensorMap(
         personKey
       );
@@ -199,10 +202,16 @@ export abstract class BaseTfjs {
         } else {
           personTensor = personGraphOutput["person"];
         }
-        let resizedImage = tf.image.resizeBilinear(personTensor, [256, 192]);
-        let url = converTensorToDataUrls(resizedImage);
+        let resizedPerson = tf.image.resizeBilinear(personTensor, [256, 192]);
+        let duplicateResizedPerson = tf.tile(resizedPerson, [
+          clothsAndMasksPath.length,
+          1,
+          1,
+          1,
+        ]);
+        let url = converTensorToDataUrls(duplicateResizedPerson);
         tf.dispose(personTensor);
-        tf.dispose(resizedImage);
+        tf.dispose(duplicateResizedPerson);
         return url;
       }
       await this.ensureChecks();
@@ -224,14 +233,21 @@ export abstract class BaseTfjs {
         }
       }
 
-      let clothsTensor = await convertImageUrlToTensor([clothPath]);
-      let clothsMaskTensor = await convertMaskUrlToTensor([clothMaskPath]);
+      let uncachedClothsTensor = uncachedClothsAndMasksPath.map(
+        (value) => value[0]
+      );
+      let uncachedMasksTensor = uncachedClothsAndMasksPath.map(
+        (value) => value[1]
+      );
+
+      let clothsTensor = await convertImageUrlsToTensor(uncachedClothsTensor);
+      let clothsMaskTensor = await convertMaskUrlToTensor(uncachedMasksTensor);
       let clothGraphOutput: NamedTensor4DMap = {
         cloth_mask: clothsMaskTensor,
         cloth: clothsTensor,
       };
 
-      tryonGraphOutput = await this.tryon_graph(
+      let unachedTryonGraphOutput = await this.tryon_graph(
         clothGraphOutput,
         personGraphOutput
       );

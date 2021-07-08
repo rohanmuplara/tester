@@ -3,6 +3,7 @@ import * as tfc from "@tensorflow/tfjs-converter";
 
 import { downloadImages, onload2promise } from "./image_utils";
 import { NamedTensor4DMap } from "./base_tfjs";
+import { Tensor4D } from "@tensorflow/tfjs-core";
 
 /**
  * Tensor references are way more efficent because they don't come back from the gpu to the cpu.
@@ -149,7 +150,7 @@ export async function convertMaskUrlToTensor(
   return stacked_tensor;
 }
 
-export async function convertImageUrlToTensor(
+export async function convertImageUrlsToTensor(
   imageUrls: string[]
 ): Promise<tf.Tensor4D> {
   let imageTensors = await Promise.all(
@@ -228,4 +229,43 @@ export async function converTensorToDataUrls(
   tf.dispose(newtensor);
   tf.dispose(individualTensors);
   return dataUrls;
+}
+
+/**
+ * This method assumes everything in name tensor map has the same batch size;
+ *
+ */
+export function padNamedTensorMap(
+  existingNameTensorMap: NamedTensor4DMap,
+  batchSize: number
+): [NamedTensor4DMap[], number] {
+  let currentBatchSize = Object.values(existingNameTensorMap)[0].shape[0];
+  let remainder = currentBatchSize % batchSize;
+
+  let namedTensorMapList = [];
+  for (let i = 0; i < Math.ceil(currentBatchSize / batchSize); i++) {
+    let namedTensorMap: NamedTensor4DMap = {};
+    Object.entries(existingNameTensorMap).forEach(
+      ([name, tensor]: [string, Tensor4D]) => {
+        if (i === Math.ceil(currentBatchSize / batchSize) && remainder !== 0) {
+          let sliced_tensor = tf.slice(
+            tensor,
+            i * batchSize,
+            batchSize - remainder
+          );
+          let new_tensor = tf.pad4d(tensor, [
+            [0, remainder],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+          ]);
+          namedTensorMap[name] = new_tensor;
+          namedTensorMap[name] = tf.slice(tensor, i * batchSize, batchSize);
+        }
+      }
+    );
+    namedTensorMapList.push(namedTensorMap);
+  }
+
+  return [namedTensorMapList, remainder];
 }
