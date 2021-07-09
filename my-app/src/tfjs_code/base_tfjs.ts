@@ -8,6 +8,8 @@ import {
   converTensorToDataUrls,
   convertDataUrlsToTensor,
   downloadNameTensorMap,
+  padNamedTensorMap,
+  duplicateNamedTensorMap,
 } from "./core";
 import { Tensor_Storage_Map } from "./tensor_storage_map";
 import { EvictionPolicy, StorageType } from "./storage_map";
@@ -246,17 +248,28 @@ export abstract class BaseTfjs {
         cloth_mask: clothsMaskTensor,
         cloth: clothsTensor,
       };
+      let [clothGraphOutputList, totalNumElements, remainder] =
+        padNamedTensorMap(clothGraphOutput, this.batchSize);
 
-      let unachedTryonGraphOutput = await this.tryon_graph(
-        clothGraphOutput,
-        personGraphOutput
+      let personNamedTensorMap = duplicateNamedTensorMap(
+        personGraphOutput,
+        totalNumElements
+      );
+      let personGraphOutputList = padNamedTensorMap(
+        personNamedTensorMap,
+        this.batchSize
       );
 
-      if (this.mode === Mode.Debug) {
-        await downloadNameTensorMap(clothGraphOutput);
-        await downloadNameTensorMap(personGraphOutput);
-        await downloadNameTensorMap(tryonGraphOutput);
+      
+      for (let i = 0; i < personGraphOutputList.length; i++) {
+        let personGraph = personGraphOutputList[i];
+        let clothGraph = clothGraphOutputList[i];
+        let unachedTryonGraphOutput = await this.tryon_graph(
+          clothGraphOutput,
+          personGraphOutput
+        );
       }
+
       tf.dispose(clothsTensor);
       tf.dispose(clothsMaskTensor);
       tf.dispose(clothGraphOutput);

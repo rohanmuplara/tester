@@ -13,11 +13,10 @@ import { Tensor4D } from "@tensorflow/tfjs-core";
  *
  * One weird thing is tfjs adds a :0 to all input nodes so this code autodoes to input nodes.
  * Tensor outputnames we have to specify for each model. Rohan couldn't figure out a way to get the output names
- * of the names to match the python names. Thus, this overwrites the names. The outputs of the names correspond
- * to the order in model.json file. Sometimes in the model json file you have will have an output labeled output2(a)
- * and another followed by output1(b). Follow the order in the file and not the numbers so output names would be (a,b)
- * and not in file.
- * We also use object map isntead a proper map because this is what tfjs api accepts.
+ * of the names to match the python names. Thus, we pass in arrayoutput names that overwrites the names.
+ * The outputs of the names correspond to the order in model.json file. Sometimes in the model json file you have will have an output labeled output2
+ * and another followed by output1. Follow the order in the file and not the numbers so output names would be (output2,output1 to match)
+ * and not in file. We also use object map isntead a proper map because this is what tfjs api accepts.
  *
  */
 export async function runModel(
@@ -39,6 +38,7 @@ export async function runModel(
   }
   return constructMap(tensorOutputNames, predictionsTensor);
 }
+
 export function constructMap(names: string[], arrayValues: any) {
   let outputDict: any = {};
   // if there is only 1 output tensor, tfjs returns it instead of an array of length 1 so can't iterate like below
@@ -53,6 +53,10 @@ export function constructMap(names: string[], arrayValues: any) {
   }
   return outputDict;
 }
+
+/**
+ * Draws tensor on canvas; Main use case is in process of converting tensor to imageurl
+ */
 export async function drawToCanvas(
   tensor: tf.Tensor4D,
   canvases: HTMLCanvasElement[]
@@ -201,6 +205,11 @@ export async function downloadNameTensorMap(namedTensorMap: NamedTensor4DMap) {
     })
   );
 }
+/**
+ * Converts a tensor to a bunch of tensor maps to data urls.
+ * Data urls are basically blobs of images in jpeg format so this
+ * converts a tensor or mask into a blog.
+ */
 
 export async function converTensorToDataUrls(
   tensor: tf.Tensor4D
@@ -233,14 +242,23 @@ export async function converTensorToDataUrls(
 
 /**
  * This method assumes everything in name tensor map has the same batch size;
- *
+ * We divide a named tensor map into a list of smaller batch tensors as we initialized
+ * the gpu to work well on a certain batch size and so if we use the same batch size over
+ * and over again, it doesn't have to reallocate on gpu, so it is faster. In actuality,
+ * we pad the remaining elements in the last tensor of the list to take advantage of the
+ * caching; ie if bath size is 5 and you have 22 elements, we pad the last tensor in list
+ * to have five elements by padding batch size by 3.
+ * Returns a tuple of the list, the total number of elements, and the remainder.
+ * Total number of elements is the initial batch size of the input tensor + the remainder.
+ * In example above, total batch size would be 25 and remainder would be 5;
  */
 export function padNamedTensorMap(
   existingNameTensorMap: NamedTensor4DMap,
   batchSize: number
-): [NamedTensor4DMap[], number] {
+): [NamedTensor4DMap[], number, number] {
   let currentBatchSize = Object.values(existingNameTensorMap)[0].shape[0];
-  let remainder = currentBatchSize % batchSize;
+  let remainder = (batchSize - (currentBatchSize % batchSize)) % batchSize;
+  let newBatchSize = currentBatchSize + remainder;
 
   let namedTensorMapList = [];
   for (let i = 0; i < Math.ceil(currentBatchSize / batchSize); i++) {
@@ -253,7 +271,8 @@ export function padNamedTensorMap(
             i * batchSize,
             batchSize - remainder
           );
-          let new_tensor = tf.pad4d(tensor, [
+          tf.dispose(sliced_tensor); // we have to dispose this because everything else is a a reference but the padded tensor is not
+          let new_tensor = tf.pad4d(sliced_tensor, [
             [0, remainder],
             [0, 0],
             [0, 0],
@@ -266,6 +285,21 @@ export function padNamedTensorMap(
     );
     namedTensorMapList.push(namedTensorMap);
   }
-
-  return [namedTensorMapList, remainder];
+  return [namedTensorMapList, newBatchSize, remainder];
+}
+/**
+ * Duplicates a named tensor map by duplicating the batch sizes
+ * n number of times.
+ */
+export function duplicateNamedTensorMap(
+  existingNameTensorMap: NamedTensor4DMap,
+  numDuplications: number
+): NamedTensor4DMap {
+  let namedTensorMap: NamedTensor4DMap = {};
+  Object.entries(existingNameTensorMap).forEach(
+    ([name, tensor]: [string, Tensor4D]) => {
+      namedTensorMap[name] = tf.tile(tensor, [numDuplications]);
+    }
+  );
+  return namedTensorMap;
 }

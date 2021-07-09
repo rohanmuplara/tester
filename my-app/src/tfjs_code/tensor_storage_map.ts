@@ -2,7 +2,12 @@ import * as tf from "@tensorflow/tfjs-core";
 import { Storage_Map } from "./storage_map";
 import { convertDataUrlsToTensor, converTensorToDataUrls } from "./core";
 import { NamedTensor4DMap } from "./base_tfjs";
-
+/**
+ * Wrapper on top of storage map to deal with named tensors. Because Tensors
+ * are not serializable, we convert them to dataUrls. One other thing is we
+ * even serialize masks as images(convert to daturl) so this stores shape so
+ * we can convert back to appropriate shape.
+ */
 export class Tensor_Storage_Map extends Storage_Map {
   async setNameTensorMap(key: string, namedTensorMap: NamedTensor4DMap) {
     let nameArrayMap = await Promise.all(
