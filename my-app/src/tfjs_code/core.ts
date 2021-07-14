@@ -322,7 +322,9 @@ export function concatenateNamedTensorList(
   return namedTensorMap;
 }
 
-export function splitNamedTensorMap(namedTensorMap: NamedTensor4DMap) {
+export function splitNamedTensorMap(
+  namedTensorMap: NamedTensor4DMap
+): NamedTensor4DMap[] {
   let currentBatchSize = Object.values(namedTensorMap)[0].shape[0];
   let namedTensorMapList = [];
   for (let i = 0; i < currentBatchSize; i++) {
@@ -334,5 +336,5 @@ export function splitNamedTensorMap(namedTensorMap: NamedTensor4DMap) {
     );
     namedTensorMapList.push(newObjectDict);
   }
-  return namedTensorMapList
+  return namedTensorMapList;
 }
