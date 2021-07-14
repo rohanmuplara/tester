@@ -303,3 +303,36 @@ export function duplicateNamedTensorMap(
   );
   return namedTensorMap;
 }
+
+/**
+ * Conconates a named tensor list
+ */
+
+export function concatenateNamedTensorList(
+  namedTensorMapList: NamedTensor4DMap[]
+) {
+  let namedTensorMap: NamedTensor4DMap = namedTensorMapList[0];
+  for (let i = 1; i < namedTensorMapList.length; i++) {
+    Object.entries(namedTensorMapList[i]).forEach(
+      ([name, tensor]: [string, Tensor4D]) => {
+        namedTensorMap[name] = tf.concat([namedTensorMap[name], tensor]);
+      }
+    );
+  }
+  return namedTensorMap;
+}
+
+export function splitNamedTensorMap(namedTensorMap: NamedTensor4DMap) {
+  let currentBatchSize = Object.values(namedTensorMap)[0].shape[0];
+  let namedTensorMapList = [];
+  for (let i = 0; i < currentBatchSize; i++) {
+    let newObjectDict = {} as any;
+    Object.entries(namedTensorMap).forEach(
+      ([name, tensor]: [string, Tensor4D]) => {
+        newObjectDict[name] = tf.slice(tensor, i, 1);
+      }
+    );
+    namedTensorMapList.push(newObjectDict);
+  }
+  return namedTensorMapList
+}

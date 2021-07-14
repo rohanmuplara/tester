@@ -10,6 +10,7 @@ import {
   downloadNameTensorMap,
   padNamedTensorMap,
   duplicateNamedTensorMap,
+  concatenateNamedTensorList,
 } from "./core";
 import { Tensor_Storage_Map } from "./tensor_storage_map";
 import { EvictionPolicy, StorageType } from "./storage_map";
@@ -248,33 +249,40 @@ export abstract class BaseTfjs {
         cloth_mask: clothsMaskTensor,
         cloth: clothsTensor,
       };
-      let [clothGraphOutputList, totalNumElements, remainder] =
+      let [clothGraphOutputList, totalNumElements, clothRemainder] =
         padNamedTensorMap(clothGraphOutput, this.batchSize);
 
-      let personNamedTensorMap = duplicateNamedTensorMap(
+      let personduplicatedGraphOutput = duplicateNamedTensorMap(
         personGraphOutput,
         totalNumElements
       );
-      let personGraphOutputList = padNamedTensorMap(
-        personNamedTensorMap,
-        this.batchSize
-      );
-
-      
-      for (let i = 0; i < personGraphOutputList.length; i++) {
-        let personGraph = personGraphOutputList[i];
-        let clothGraph = clothGraphOutputList[i];
+      let [personGraphOutputList, personTotal, personRemainder] =
+        padNamedTensorMap(personGraphOutput, this.batchSize);
+      let tryonGraphOutputList = [];
+      for (let i = 0; i < clothGraphOutputList.length; i++) {
+        let clothGraphOutput = clothGraphOutputList[i];
+        let personGraphOutput = personGraphOutputList[i];
         let unachedTryonGraphOutput = await this.tryon_graph(
           clothGraphOutput,
           personGraphOutput
         );
+        tryonGraphOutputList.push(unachedTryonGraphOutput);
       }
-
-      tf.dispose(clothsTensor);
-      tf.dispose(clothsMaskTensor);
-      tf.dispose(clothGraphOutput);
-      tf.dispose(personGraphOutput);
+      let tryonGraphUnanchedOutput =
+        concatenateNamedTensorList(tryonGraphOutputList);
+      let tryonUncachedPerson = tryonGraphUnanchedOutput["person"];
+      let tryonUnachedPersonList = tf.split(
+        tryonUncachedPerson,
+        tryonUncachedPerson.shape[0]
+      );
+      let j = 0;
+      for (let i = 0; i < tryonOutputs.length; i++) {
+        if (tryonOutputs[i] === null) {
+          tryonOutputs[i] = tryonUnachedPersonList[i];
+        }
+      }
     }
+
     let tryonPersonDataArray = await converTensorToDataUrls(
       tryonGraphOutput["person"] as tf.Tensor4D
     );
